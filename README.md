@@ -24,3 +24,6 @@ public:
 
 Then copy materials folder to the your mod folder.
 
+# If you have some problem
+then go to the [Discord server](https://discord.gg/ZJXxJc3v) and describe the problem.
+
