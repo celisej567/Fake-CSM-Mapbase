@@ -9,4 +9,14 @@ Recreated env_cascade_light from CS GO based on env_projectedtexture and Real CS
 # How to make this work in your Source 2013 mod?
 Copy client and server foldert to your "source code/game" folder, then find client_base/server_base.vpc files in these folders and add "$Include "csm.vpc"" to the top, open createallprojects.bat (or creategameprojects.bat) and add "-f" to the end of the line. After all this stuff you should launch your bat file.
 
+```cpp
+class CEnvLight : public CLight
+{
+public:
+	DECLARE_CLASS(CEnvLight, CLight);
+
+	bool	KeyValue(const char* szKeyName, const char* szValue);
+	void	Spawn(void);
+};
+```
 
