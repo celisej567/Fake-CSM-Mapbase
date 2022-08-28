@@ -22,3 +22,5 @@ public:
 };
 ```
 
+Then copy materials folder to the your mod folder.
+
