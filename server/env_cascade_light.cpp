@@ -1,0 +1,491 @@
+//========= Copyright Valve Corporation, All rights reserved. ============//
+//
+// Purpose: Entity to control screen overlays on a player
+//
+//=============================================================================
+
+#include "cbase.h"
+#include "shareddefs.h"
+#include "lights.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
+#define ENV_CASCADE_STARTON			(1<<0)
+
+static ConVar defdist("csm_default_distance", "1000", 0, "Default Z distance. Used for some fov calculations");
+static ConVar curdist("csm_current_distance","14000", 0, "i like nagatoro");
+
+static ConVar defFOV("csm_default_fov","15", 0, "Default FOV. Used for some fov calculations");
+static ConVar curFOV("csm_current_fov","15", FCVAR_DEVELOPMENTONLY, "Current FOV. Please dont change by yourself, please.");
+static ConVar csm_second_fov("csm_second_fov", "17", FCVAR_NONE ,"FOV of the second csm.");
+
+class CLightOrigin : public CPointEntity
+{
+	DECLARE_CLASS(CLightOrigin, CPointEntity);
+public:
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+
+	void Spawn();
+
+	CLightOrigin();
+
+	bool angFEnv = true;
+	
+	void InitialThink(void);
+
+private:
+
+	CNetworkVector(LightEnvVector);
+};
+
+LINK_ENTITY_TO_CLASS(csmorigin, CLightOrigin);
+
+BEGIN_DATADESC(CLightOrigin)
+DEFINE_FIELD(LightEnvVector, FIELD_VECTOR),
+DEFINE_THINKFUNC(InitialThink)
+END_DATADESC()
+
+IMPLEMENT_SERVERCLASS_ST(CLightOrigin, DT_LightOrigin)
+SendPropVector(SENDINFO(LightEnvVector))
+END_SEND_TABLE()
+
+CLightOrigin::CLightOrigin() 
+{
+}
+
+void CLightOrigin::Spawn()
+{
+	if (angFEnv)
+	{
+		CBaseEntity* pEntity = NULL;
+		pEntity = gEntList.FindEntityByClassname(pEntity, "light_environment");
+		if (pEntity)
+		{
+			CEnvLight* pEnv = dynamic_cast<CEnvLight*>(pEntity);
+
+			QAngle bb = pEnv->GetAbsAngles();
+			bb.x = bb.x;
+			SetAbsAngles(bb);
+			//Msg("light_environment Founded!\n");
+			ConColorMsg(Color(0,230,0), "light_environment Founded!\n");
+		}
+		else
+		{
+			//Msg("What the fuck? Map dont have light_environment with targetname!");
+			ConColorMsg(Color(230, 0, 0), "What the fuck? Map dont have light_environment with targetname!\n");
+		}
+	}
+}
+
+void CLightOrigin::InitialThink()
+{
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: second csm
+//-----------------------------------------------------------------------------
+
+class CEnvCascadeLightSecond : public CPointEntity
+{
+	DECLARE_CLASS(CEnvCascadeLightSecond, CPointEntity);
+public:
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+
+	CEnvCascadeLightSecond();
+	bool KeyValue(const char* szKeyName, const char* szValue);
+
+	// Always transmit to clients
+	virtual int UpdateTransmitState();
+	virtual void Activate(void);
+
+	void InitialThink(void);
+
+	CNetworkHandle(CBaseEntity, m_hTargetEntity);
+	CNetworkVector(m_LinearFloatLightColor);
+
+private:
+	CNetworkVar(bool, m_bState);
+	CNetworkVar(float, m_flLightFOV);
+	CNetworkVar(bool, m_bEnableShadows);
+	CNetworkVar(bool, m_bLightOnlyTarget);
+	CNetworkVar(bool, m_bLightWorld);
+	CNetworkVar(bool, m_bCameraSpace);
+	CNetworkVar(float, m_flAmbient);
+	CNetworkString(m_SpotlightTextureName, MAX_PATH);
+	CNetworkVar(int, m_nSpotlightTextureFrame);
+	CNetworkVar(float, m_flNearZ);
+	CNetworkVar(float, m_flFarZ);
+	CNetworkVar(int, m_nShadowQuality);
+};
+
+LINK_ENTITY_TO_CLASS(second_csm, CEnvCascadeLightSecond);
+
+BEGIN_DATADESC(CEnvCascadeLightSecond)
+DEFINE_FIELD(m_hTargetEntity, FIELD_EHANDLE),
+DEFINE_FIELD(m_bState, FIELD_BOOLEAN),
+DEFINE_KEYFIELD(m_flLightFOV, FIELD_FLOAT, "lightfov"),
+DEFINE_KEYFIELD(m_bEnableShadows, FIELD_BOOLEAN, "enableshadows"),
+DEFINE_KEYFIELD(m_bLightOnlyTarget, FIELD_BOOLEAN, "lightonlytarget"),
+DEFINE_KEYFIELD(m_bLightWorld, FIELD_BOOLEAN, "lightworld"),
+DEFINE_KEYFIELD(m_bCameraSpace, FIELD_BOOLEAN, "cameraspace"),
+DEFINE_KEYFIELD(m_flAmbient, FIELD_FLOAT, "ambient"),
+DEFINE_AUTO_ARRAY_KEYFIELD(m_SpotlightTextureName, FIELD_CHARACTER, "texturename"),
+DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
+DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
+DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
+DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
+DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
+DEFINE_THINKFUNC(InitialThink),
+END_DATADESC()
+
+IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLightSecond, DT_EnvCascadeLightSecond)
+SendPropEHandle(SENDINFO(m_hTargetEntity)),
+SendPropBool(SENDINFO(m_bState)),
+SendPropFloat(SENDINFO(m_flLightFOV)),
+SendPropBool(SENDINFO(m_bEnableShadows)),
+SendPropBool(SENDINFO(m_bLightOnlyTarget)),
+SendPropBool(SENDINFO(m_bLightWorld)),
+SendPropBool(SENDINFO(m_bCameraSpace)),
+SendPropVector(SENDINFO(m_LinearFloatLightColor)),
+SendPropFloat(SENDINFO(m_flAmbient)),
+SendPropString(SENDINFO(m_SpotlightTextureName)),
+SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
+SendPropFloat(SENDINFO(m_flNearZ), 16, SPROP_ROUNDDOWN, 0.0f, 500.0f),
+SendPropFloat(SENDINFO(m_flFarZ), 18, SPROP_ROUNDDOWN, 0.0f, 1500.0f),
+SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED)  // Just one bit for now
+END_SEND_TABLE()
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
+{
+	m_bState = true;
+	m_flLightFOV = 45.0f;
+	m_bEnableShadows = true;
+	m_bLightOnlyTarget = false;
+	m_bLightWorld = true;
+	m_bCameraSpace = false;
+
+	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_ring");
+	m_nSpotlightTextureFrame = 0;
+	m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
+	m_flAmbient = 0.0f;
+	m_flNearZ = 8000.0f;
+	m_flFarZ = 16000.0f;
+	m_nShadowQuality = 0;
+}
+
+void UTIL_ColorStringToLinearFloatColorCSMFakeSecond(Vector& color, const char* pString)
+{
+	float tmp[4];
+	UTIL_StringToFloatArray(tmp, 4, pString);
+	if (tmp[3] <= 0.0f)
+	{
+		tmp[3] = 255.0f;
+	}
+	tmp[3] *= (1.0f / 255.0f);
+	color.x = GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3];
+	color.y = GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3];
+	color.z = GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3];
+}
+
+bool CEnvCascadeLightSecond::KeyValue(const char* szKeyName, const char* szValue)
+{
+	if (FStrEq(szKeyName, "lightcolor"))
+	{
+		Vector tmp;
+		UTIL_ColorStringToLinearFloatColorCSMFakeSecond(tmp, szValue);
+		m_LinearFloatLightColor = tmp;
+	}
+	else
+	{
+		return BaseClass::KeyValue(szKeyName, szValue);
+	}
+
+	return true;
+}
+
+void CEnvCascadeLightSecond::Activate(void)
+{
+	if (GetSpawnFlags() & ENV_CASCADE_STARTON)
+	{
+		m_bState = true;
+	}
+
+	SetThink(&CEnvCascadeLightSecond::InitialThink);
+	SetNextThink(gpGlobals->curtime + 0.1f);
+
+	BaseClass::Activate();
+}
+
+void CEnvCascadeLightSecond::InitialThink(void)
+{
+	float bibigon = defdist.GetFloat() / curdist.GetFloat();
+	m_flLightFOV = csm_second_fov.GetFloat() * bibigon;
+	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
+}
+
+int CEnvCascadeLightSecond::UpdateTransmitState()
+{
+	return SetTransmitState(FL_EDICT_ALWAYS);
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Purpose: main csm code
+//-----------------------------------------------------------------------------
+class CEnvCascadeLight : public CPointEntity
+{
+	DECLARE_CLASS(CEnvCascadeLight, CPointEntity);
+public:
+	DECLARE_DATADESC();
+	DECLARE_SERVERCLASS();
+
+	CEnvCascadeLight();
+	bool KeyValue(const char* szKeyName, const char* szValue);
+
+	// Always transmit to clients
+	virtual int UpdateTransmitState();
+	virtual void Activate(void);
+	void Spawn();
+	void Preparation();
+
+	void InputTurnOn(inputdata_t& inputdata);
+	void InputTurnOff(inputdata_t& inputdata);
+	void InputSetEnableShadows(inputdata_t& inputdata);
+	void InputSetLightColor( inputdata_t &inputdata );
+	void InputSetSpotlightTexture(inputdata_t& inputdata);
+	void InputSetAmbient(inputdata_t& inputdata);
+
+	void InitialThink(void);
+
+	CNetworkHandle(CBaseEntity, m_hTargetEntity);
+
+private:
+	CNetworkVar(bool, m_bState);
+	CNetworkVar(float, m_flLightFOV);
+	CNetworkVar(bool, EnableAngleFromEnv);
+	CNetworkVar(bool, m_bEnableShadows);
+	CNetworkVar(bool, m_bLightOnlyTarget);
+	CNetworkVar(bool, m_bLightWorld);
+	CNetworkVar(bool, m_bCameraSpace);
+	CNetworkVector(m_LinearFloatLightColor);
+	CNetworkVar(float, m_flAmbient);
+	CNetworkString(m_SpotlightTextureName, MAX_PATH);
+	CNetworkVar(int, m_nSpotlightTextureFrame);
+	CNetworkVar(float, m_flNearZ);
+	CNetworkVar(float, m_flFarZ);
+	CNetworkVar(int, m_nShadowQuality);
+};
+
+LINK_ENTITY_TO_CLASS(env_cascade_light, CEnvCascadeLight);
+
+BEGIN_DATADESC(CEnvCascadeLight)
+DEFINE_FIELD(m_hTargetEntity, FIELD_EHANDLE),
+DEFINE_FIELD(m_bState, FIELD_BOOLEAN),
+DEFINE_KEYFIELD(m_bEnableShadows, FIELD_BOOLEAN, "enableshadows"),
+DEFINE_KEYFIELD(m_bLightOnlyTarget, FIELD_BOOLEAN, "lightonlytarget"),
+DEFINE_KEYFIELD(m_bLightWorld, FIELD_BOOLEAN, "lightworld"),
+DEFINE_KEYFIELD(m_bCameraSpace, FIELD_BOOLEAN, "cameraspace"),
+DEFINE_KEYFIELD(m_flAmbient, FIELD_FLOAT, "ambient"),
+DEFINE_AUTO_ARRAY_KEYFIELD(m_SpotlightTextureName, FIELD_CHARACTER, "texturename"),
+DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
+DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
+DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
+DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
+DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
+DEFINE_KEYFIELD(EnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
+
+DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
+DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
+DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
+// this is broken . . need to be able to set color and intensity like light_dynamic
+//	DEFINE_INPUTFUNC( FIELD_COLOR32, "LightColor", InputSetLightColor ),
+DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
+DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
+DEFINE_THINKFUNC(InitialThink),
+END_DATADESC()
+
+IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLight, DT_EnvCascadeLight)
+SendPropEHandle(SENDINFO(m_hTargetEntity)),
+SendPropBool(SENDINFO(m_bState)),
+SendPropFloat(SENDINFO(m_flLightFOV)),
+SendPropBool(SENDINFO(m_bEnableShadows)),
+SendPropBool(SENDINFO(m_bLightOnlyTarget)),
+SendPropBool(SENDINFO(m_bLightWorld)),
+SendPropBool(SENDINFO(m_bCameraSpace)),
+SendPropVector(SENDINFO(m_LinearFloatLightColor)),
+SendPropFloat(SENDINFO(m_flAmbient)),
+SendPropString(SENDINFO(m_SpotlightTextureName)),
+SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
+SendPropFloat(SENDINFO(m_flNearZ), 16, SPROP_ROUNDDOWN, 0.0f, 500.0f),
+SendPropFloat(SENDINFO(m_flFarZ), 18, SPROP_ROUNDDOWN, 0.0f, 1500.0f),
+SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED)  // Just one bit for now
+END_SEND_TABLE()
+
+//-----------------------------------------------------------------------------
+// Purpose: 
+//-----------------------------------------------------------------------------
+CEnvCascadeLight::CEnvCascadeLight(void)
+{
+	m_bState = true;
+	m_flLightFOV = 45.0f;
+	m_bEnableShadows = true;
+	m_bLightOnlyTarget = false;
+	m_bLightWorld = true;
+	m_bCameraSpace = false;
+	EnableAngleFromEnv = false;
+
+	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
+	m_nSpotlightTextureFrame = 0;
+	m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
+	m_flAmbient = 0.0f;
+	m_flNearZ = 8000.0f;
+	m_flFarZ = 16000.0f;
+	m_nShadowQuality = 0;
+}
+
+void CEnvCascadeLight::Preparation()
+{
+	CreateEntityByName("csmorigin");
+	CreateEntityByName("second_csm");
+	defFOV.SetValue(m_flLightFOV);
+	CBaseEntity* CSMOrigin = NULL;
+	CBaseEntity* CSMSecond = NULL;
+	
+	CSMOrigin = gEntList.FindEntityByClassname(CSMOrigin, "csmorigin");
+	//if origin is exist
+	if (CSMOrigin)
+	{
+		
+		CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
+		//if second csm is exist
+		if (CSMSecond)
+		{
+			CEnvCascadeLightSecond* SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);
+			SecondCSM->SetAbsAngles(GetAbsAngles());
+			SecondCSM->SetAbsOrigin(GetAbsOrigin());
+			SecondCSM->SetParent(GetBaseEntity());
+			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor;
+			
+			DispatchSpawn(SecondCSM);
+		}
+
+		CLightOrigin* pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
+		if (EnableAngleFromEnv)
+		{
+			pEnv->angFEnv = true;
+		}
+		else
+		{
+			pEnv->SetAbsAngles(GetAbsAngles());
+		}
+		SetParent(pEnv, 1);
+		SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
+
+		float bibigon = defdist.GetFloat() / curdist.GetFloat();
+		curFOV.SetValue(defFOV.GetFloat() * bibigon);
+		m_flLightFOV = curFOV.GetFloat();
+		DispatchSpawn(CSMOrigin);
+	}
+	else
+	{
+		Msg("Main csm entity can't find \"csmorigin\" entity!");
+	}
+	
+}
+
+void CEnvCascadeLight::Spawn()
+{
+	Preparation();
+}
+
+void UTIL_ColorStringToLinearFloatColorCSMFake(Vector& color, const char* pString)
+{
+	float tmp[4];
+	UTIL_StringToFloatArray(tmp, 4, pString);
+	if (tmp[3] <= 0.0f)
+	{
+		tmp[3] = 255.0f;
+	}
+	tmp[3] *= (1.0f / 255.0f);
+	color.x = GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3];
+	color.y = GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3];
+	color.z = GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3];
+}
+
+bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
+{
+	if (FStrEq(szKeyName, "lightcolor"))
+	{
+		Vector tmp;
+		UTIL_ColorStringToLinearFloatColorCSMFake(tmp, szValue);
+		m_LinearFloatLightColor = tmp;
+	}
+	else
+	{
+		return BaseClass::KeyValue(szKeyName, szValue);
+	}
+
+	return true;
+}
+
+void CEnvCascadeLight::InputTurnOn(inputdata_t& inputdata)
+{
+	m_bState = true;
+}
+
+void CEnvCascadeLight::InputTurnOff(inputdata_t& inputdata)
+{
+	m_bState = false;
+}
+
+
+void CEnvCascadeLight::InputSetEnableShadows(inputdata_t& inputdata)
+{
+	m_bEnableShadows = inputdata.value.Bool();
+}
+
+//void CEnvProjectedTexture::InputSetLightColor( inputdata_t &inputdata )
+//{
+	//m_cLightColor = inputdata.value.Color32();
+//}
+
+void CEnvCascadeLight::InputSetAmbient(inputdata_t& inputdata)
+{
+	m_flAmbient = inputdata.value.Float();
+}
+
+void CEnvCascadeLight::InputSetSpotlightTexture(inputdata_t& inputdata)
+{
+	Q_strcpy(m_SpotlightTextureName.GetForModify(), inputdata.value.String());
+}
+
+void CEnvCascadeLight::Activate(void)
+{
+	if (GetSpawnFlags() & ENV_CASCADE_STARTON)
+	{
+		m_bState = true;
+	}
+
+	SetThink(&CEnvCascadeLight::InitialThink);
+	SetNextThink(gpGlobals->curtime + 0.1f);
+
+	BaseClass::Activate();
+}
+
+void CEnvCascadeLight::InitialThink(void)
+{
+	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
+}
+
+int CEnvCascadeLight::UpdateTransmitState()
+{
+	return SetTransmitState(FL_EDICT_ALWAYS);
+}
