@@ -340,7 +340,7 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 	m_bLightOnlyTarget = false;
 	m_bLightWorld = true;
 	m_bCameraSpace = false;
-	EnableAngleFromEnv = true;
+	EnableAngleFromEnv = false;
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
 	m_nSpotlightTextureFrame = 0;
@@ -387,10 +387,11 @@ void CEnvCascadeLight::Preparation()
 		{
 			pEnv->angFEnv = true;
 			SetLocalAngles(QAngle(90, 0, 0));
+			
 		}
 		else
 		{
-			pEnv->SetAbsAngles(QAngle(-GetLocalAngles().x, GetLocalAngles().y,-GetLocalAngles().z));
+			pEnv->SetAbsAngles(QAngle(-(GetLocalAngles().x - 90), GetLocalAngles().y,-GetLocalAngles().z));
 			
 			Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
 

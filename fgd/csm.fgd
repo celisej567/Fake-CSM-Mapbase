@@ -1,0 +1,32 @@
+
+@include "halflife2.fgd"
+
+@PointClass base(Targetname, Parentname, Angles) studio("models/editor/cone_helper.mdl") frustum(lightfov,nearz,farz,lightcolor,-1) = env_cascade_light : 
+"An entity to control the sunlight that casts cascaded shadows in the map."
+[
+	spawnflags(flags) =
+	[
+		1  : "Enabled"				: 1
+	]
+	
+	enableshadows(Choices) : "Enable Shadows" : 0 : "Enables/disables shadows from this projected texture." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	lightcolor(color255)		: "Light Color" : "255 255 255 200" : "Light Color RGB-Intensity"
+	cameraspace(integer)		: "Camera Space" : 0 : "Angles are interpreted as being relative to camera."
+	
+	uselightenvangles(Choices) : "Use light_environment's angles" : 1 : "If true, the CSM shadow angles are automatically harvested from the light_environment's angles. If false, this entity's angles are used." = 
+	[
+		1 : "Yes"
+		0 : "No"
+	]
+	
+	ambient(integer)	:"Ambient" : 0 : "idk"
+	
+	input TurnOn(void)		: "Turn on the texture"
+	input TurnOff(void)		: "Turn off the texture"
+	input EnableShadows(bool)		: "Turn off the shadows"
+	input SpotlightTexture(string) : "Change texture"
+]
