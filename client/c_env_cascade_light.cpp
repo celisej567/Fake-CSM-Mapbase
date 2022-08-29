@@ -260,18 +260,6 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
 
-	state.m_bOrtho = csm_ortho.GetBool();
-	if (state.m_bOrtho)
-	{
-		state.m_fOrthoLeft = csm_ortho_left.GetInt();
-		state.m_fOrthoTop = csm_ortho_top.GetInt();
-		state.m_fOrthoRight = csm_ortho_right.GetInt();
-		state.m_fOrthoBottom = csm_ortho_bottom.GetInt();
-
-		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-	}
-
 
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
@@ -300,8 +288,8 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 		g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
 
-		mat_slopescaledepthbias_shadowmap.SetValue("4");
-		mat_depthbias_shadowmap.SetValue("0.000001");
+		//mat_slopescaledepthbias_shadowmap.SetValue("4");
+		//mat_depthbias_shadowmap.SetValue("0.000001");
 		scissor.SetValue("0");
 
 }
@@ -486,20 +474,6 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
 	
-	state.m_bOrtho = csm_ortho.GetBool();
-	if(state.m_bOrtho)
-	{
-		float flOrthoSize = 1000.0f;
-
-		state.m_fOrthoLeft = -flOrthoSize;
-		state.m_fOrthoTop = -flOrthoSize;
-		state.m_fOrthoRight = flOrthoSize;
-		state.m_fOrthoBottom = flOrthoSize;
-
-		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-	}
-	
 
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
@@ -539,8 +513,8 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	m_flLightFOV = ConVarRef("csm_second_fov").GetFloat();
 	
-	mat_slopescaledepthbias_shadowmap.SetValue("4");
-	mat_depthbias_shadowmap.SetValue("0.000001");
+	//mat_slopescaledepthbias_shadowmap.SetValue("4");
+	
 	scissor.SetValue("0");
 
 }
