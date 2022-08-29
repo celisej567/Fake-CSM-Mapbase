@@ -28,7 +28,8 @@ Then copy materials folder to the your mod folder.
 First, add env_cascade_light to the map and set it to the angle you want. If you want to use the angle from light_environment then you need to set "Use light_environment's angles" to Yes and do some manipulation with your light_environment:
 - Add any targetname to your light_environment
 - Copy Pitch to second number of the Angle.
-- Thats how it should looks like: 
+- Thats how it should looks like:
+
 ![Alt-текст](https://github.com/celisej567/Fake-CSM-Source-2013/blob/main/screen1.png "Орк")
 
 # If you have some problem
