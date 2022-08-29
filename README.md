@@ -28,6 +28,7 @@ Your `mat_depthbias_shadowmap` better should be `0.00001`, `mat_slopescaledepthb
 
 # How to add this light in your map
 Copy csm.fgd from fgd folder to bin folder in SDK Base 2013.
+Add this fgd to your hammer.
 Add env_cascade_light to the map and set it to the angle you want. 
 If you want to use the angle from light_environment then you need to set `Use light_environment's angles` to Yes and do some manipulation with your light_environment:
 - Add any targetname to your light_environment
