@@ -28,7 +28,7 @@ ConVar csm_ortho_left("csm_ortho_left", "-1000");
 ConVar csm_ortho_top("csm_ortho_top", "-1000");
 ConVar csm_ortho_bottom("csm_ortho_bottom", "1000");
 ConVar csm_ortho_right("csm_ortho_right", "1000");
-ConVar csm_test_color_interpolation("csm_test_color_interpolation","0");
+//ConVar csm_test_color_interpolation("csm_test_color_interpolation","0"); //я не помню что она делает, но она определённо этого не делает
 
 //-----------------------------------------------------------------------------
 // Purpose: main point for change angle of the light
@@ -259,8 +259,20 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
+#ifdef MAPBASE
 
+	state.m_bOrtho = csm_ortho.GetBool();
+	if (state.m_bOrtho)
+	{
+		state.m_fOrthoLeft = csm_ortho_left.GetInt();
+		state.m_fOrthoTop = csm_ortho_top.GetInt();
+		state.m_fOrthoRight = csm_ortho_right.GetInt();
+		state.m_fOrthoBottom = csm_ortho_bottom.GetInt();
 
+		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
+		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
+	}
+#endif // MAPBASE
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
 	{
@@ -289,7 +301,7 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 		g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
 
 		//mat_slopescaledepthbias_shadowmap.SetValue("4");
-		//mat_depthbias_shadowmap.SetValue("0.000001");
+		//mat_depthbias_shadowmap.SetValue("0.00001");
 		scissor.SetValue("0");
 
 }
@@ -474,7 +486,23 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
 	
+#ifdef MAPBASE
 
+	state.m_bOrtho = csm_ortho.GetBool();
+	if(state.m_bOrtho)
+	{
+		float flOrthoSize = 1000.0f;
+
+		state.m_fOrthoLeft = -flOrthoSize;
+		state.m_fOrthoTop = -flOrthoSize;
+		state.m_fOrthoRight = flOrthoSize;
+		state.m_fOrthoBottom = flOrthoSize;
+
+		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
+		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
+	}
+	
+#endif
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
 	{
@@ -499,7 +527,7 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	g_pClientShadowMgr->SetFlashlightLightWorld(m_LightHandle, m_bLightWorld);
 
-
+#ifdef MAPBASE
 	if (state.m_bOrtho)
 	{
 		bool bSupressWorldLights = false;
@@ -508,13 +536,14 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 		g_pClientShadowMgr->SetShadowFromWorldLightsEnabled(!bSupressWorldLights);
 	}
+#endif // MAPBASE
 
 	g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
 
 	m_flLightFOV = ConVarRef("csm_second_fov").GetFloat();
 	
 	//mat_slopescaledepthbias_shadowmap.SetValue("4");
-	
+	//mat_depthbias_shadowmap.SetValue("0.00001");
 	scissor.SetValue("0");
 
 }

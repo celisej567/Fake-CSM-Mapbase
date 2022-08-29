@@ -31,7 +31,7 @@ public:
 
 	CLightOrigin();
 
-	bool angFEnv = true;
+	bool angFEnv = false;
 	
 	void InitialThink(void);
 
@@ -68,7 +68,7 @@ void CLightOrigin::Spawn()
 			QAngle bb = pEnv->GetAbsAngles();
 			bb.x = bb.x;
 			SetAbsAngles(bb);
-			//Msg("light_environment Founded!\n");
+			
 			ConColorMsg(Color(0,230,0), "light_environment Founded!\n");
 		}
 		else
@@ -340,7 +340,7 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 	m_bLightOnlyTarget = false;
 	m_bLightWorld = true;
 	m_bCameraSpace = false;
-	EnableAngleFromEnv = false;
+	EnableAngleFromEnv = true;
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
 	m_nSpotlightTextureFrame = 0;
@@ -363,7 +363,10 @@ void CEnvCascadeLight::Preparation()
 	//if origin is exist
 	if (CSMOrigin)
 	{
-		
+
+		CLightOrigin* pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
+
+
 		CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
 		//if second csm is exist
 		if (CSMSecond)
@@ -373,21 +376,27 @@ void CEnvCascadeLight::Preparation()
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
 			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor;
-			
+
 			DispatchSpawn(SecondCSM);
 		}
 
-		CLightOrigin* pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
+		SetParent(pEnv, 1);
+		SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
+
 		if (EnableAngleFromEnv)
 		{
 			pEnv->angFEnv = true;
+			SetLocalAngles(QAngle(90, 0, 0));
 		}
 		else
 		{
-			pEnv->SetAbsAngles(GetAbsAngles());
+			pEnv->SetAbsAngles(QAngle(-GetLocalAngles().x, GetLocalAngles().y,-GetLocalAngles().z));
+			
+			Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
+
+			SetLocalAngles(QAngle(90, 0, 0));
+			DevMsg("CSM using light_environment \n");
 		}
-		SetParent(pEnv, 1);
-		SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
 
 		float bibigon = defdist.GetFloat() / curdist.GetFloat();
 		curFOV.SetValue(defFOV.GetFloat() * bibigon);
