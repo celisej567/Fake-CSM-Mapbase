@@ -8,12 +8,6 @@
 	[
 		1  : "Enabled"				: 1
 	]
-	
-	enableshadows(Choices) : "Enable Shadows" : 0 : "Enables/disables shadows from this projected texture." =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
 	lightcolor(color255)		: "Light Color" : "255 255 255 200" : "Light Color RGB-Intensity"
 	cameraspace(integer)		: "Camera Space" : 0 : "Angles are interpreted as being relative to camera."
 	

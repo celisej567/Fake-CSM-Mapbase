@@ -13,12 +13,11 @@
 
 #define ENV_CASCADE_STARTON			(1<<0)
 
-static ConVar defdist("csm_default_distance", "1000", 0, "Default Z distance. Used for some fov calculations");
-static ConVar curdist("csm_current_distance","14000", 0, "i like nagatoro");
-
-static ConVar defFOV("csm_default_fov","15", 0, "Default FOV. Used for some fov calculations");
-static ConVar curFOV("csm_current_fov","15", FCVAR_DEVELOPMENTONLY, "Current FOV. Please dont change by yourself, please.");
-static ConVar csm_second_fov("csm_second_fov", "17", FCVAR_NONE ,"FOV of the second csm.");
+static ConVar defdist("csm_default_distance", "1000", FCVAR_DEVELOPMENTONLY, "Default Z distance. Used for some fov calculations. Please dont change");
+static ConVar curdist("csm_current_distance","14000", 0, "Current Z distance. You can change it.");
+static ConVar defFOV("csm_default_fov","15", FCVAR_DEVELOPMENTONLY, "Default FOV. Used for some fov calculations. Please dont change");
+static ConVar curFOV("csm_current_fov","15", 0, "Current FOV. You can change it");
+static ConVar csm_second_fov("csm_second_fov", "26", FCVAR_NONE ,"FOV of the second csm.");
 
 class CLightOrigin : public CPointEntity
 {
@@ -268,6 +267,7 @@ public:
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
 
 private:
+	CLightOrigin* pEnv;
 	CNetworkVar(bool, m_bState);
 	CNetworkVar(float, m_flLightFOV);
 	CNetworkVar(bool, EnableAngleFromEnv);
@@ -364,7 +364,7 @@ void CEnvCascadeLight::Preparation()
 	if (CSMOrigin)
 	{
 
-		CLightOrigin* pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
+		pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
 
 
 		CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
@@ -392,17 +392,13 @@ void CEnvCascadeLight::Preparation()
 		}
 		else
 		{
-			pEnv->SetAbsAngles(QAngle(-(GetLocalAngles().x - 90), -GetLocalAngles().y,-GetLocalAngles().z));
-			
+			pEnv->SetAbsAngles(QAngle((GetLocalAngles().x - 90), GetLocalAngles().y, -GetLocalAngles().z));
+
 			Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
 
 			SetLocalAngles(QAngle(90, 0, 0));
 			DevMsg("CSM using light_environment \n");
 		}
-
-		float bibigon = defdist.GetFloat() / curdist.GetFloat();
-		curFOV.SetValue(defFOV.GetFloat() * bibigon);
-		m_flLightFOV = curFOV.GetFloat();
 		//DispatchSpawn(CSMSecond);
 		DispatchSpawn(CSMOrigin);
 	}
@@ -495,6 +491,12 @@ void CEnvCascadeLight::Activate(void)
 void CEnvCascadeLight::InitialThink(void)
 {
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
+
+	float bibigon = defdist.GetFloat() / curdist.GetFloat();
+	curFOV.SetValue(defFOV.GetFloat() * bibigon);
+	m_flLightFOV = curFOV.GetFloat();
+	//if(pEnv != NULL)
+	//SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
 }
 
 int CEnvCascadeLight::UpdateTransmitState()
