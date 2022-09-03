@@ -350,7 +350,7 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 	m_flFarZ = 16000.0f;
 	m_nShadowQuality = 0;
 }
-
+ConVar csm_second_intensity("csm_second_intensity", "2");
 void CEnvCascadeLight::Preparation()
 {
 	CreateEntityByName("csmorigin");
@@ -371,11 +371,12 @@ void CEnvCascadeLight::Preparation()
 		//if second csm is exist
 		if (CSMSecond)
 		{
-			CEnvCascadeLightSecond* SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);
+			CEnvCascadeLightSecond* SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);	
 			SecondCSM->SetAbsAngles(GetAbsAngles());
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
-			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor;
+			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * csm_second_intensity.GetFloat();
+			
 
 			DispatchSpawn(SecondCSM);
 		}
@@ -391,7 +392,7 @@ void CEnvCascadeLight::Preparation()
 		}
 		else
 		{
-			pEnv->SetAbsAngles(QAngle(-(GetLocalAngles().x - 90), GetLocalAngles().y,-GetLocalAngles().z));
+			pEnv->SetAbsAngles(QAngle(-(GetLocalAngles().x - 90), -GetLocalAngles().y,-GetLocalAngles().z));
 			
 			Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
 
@@ -402,6 +403,7 @@ void CEnvCascadeLight::Preparation()
 		float bibigon = defdist.GetFloat() / curdist.GetFloat();
 		curFOV.SetValue(defFOV.GetFloat() * bibigon);
 		m_flLightFOV = curFOV.GetFloat();
+		//DispatchSpawn(CSMSecond);
 		DispatchSpawn(CSMOrigin);
 	}
 	else

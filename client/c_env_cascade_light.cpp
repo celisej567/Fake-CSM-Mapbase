@@ -22,13 +22,15 @@ static ConVarRef mat_slopescaledepthbias_shadowmap("mat_slopescaledepthbias_shad
 static ConVarRef mat_depthbias_shadowmap("mat_depthbias_shadowmap");
 static ConVar scissor("r_flashlightscissor", "0");
 
-static ConVar csm_ortho("csm_ortho","0");
+#ifdef MAPBASE
+static ConVar csm_ortho("csm_ortho","0", 0, "Turn light into ortho. Im lazy right now to make this works fine");
 ConVar csm_ortho_nearz("csm_ortho_nearz", "512");
 ConVar csm_ortho_left("csm_ortho_left", "-1000");
 ConVar csm_ortho_top("csm_ortho_top", "-1000");
 ConVar csm_ortho_bottom("csm_ortho_bottom", "1000");
 ConVar csm_ortho_right("csm_ortho_right", "1000");
 //ConVar csm_test_color_interpolation("csm_test_color_interpolation","0"); //я не помню что она делает, но она определённо этого не делает
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: main point for change angle of the light
@@ -66,8 +68,7 @@ void C_LightOrigin::Simulate()
 	BaseClass::Simulate();
 }
 
-const char* filter = CommandLine()->ParmValue("-ptfilter", "0.5");
-ConVar bebra("csm_filter", filter);
+ConVar bebra("csm_filter", "1");
 
 //-----------------------------------------------------------------------------
 // Purpose: main csm code	
