@@ -3,6 +3,8 @@ Recreated env_cascade_light from CS GO based on env_projectedtexture and Real CS
 
 - It's not finished yet, but some basic functionality is already there. There are also some issues with lighting orientation, so if you get very strange lighting position behavior then try manually rotating it to the same position as light_environment.
 
+You can change csm settings in console, just type `csm_`.
+
 # Features
 - Partial compatibility with CSGO.
 
