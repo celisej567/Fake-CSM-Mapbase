@@ -38,6 +38,6 @@ If you want to use the angle from light_environment then you need to set `Use li
 ![Alt-текст](https://github.com/celisej567/Fake-CSM-Source-2013/blob/main/screen1.png "")
 
 
-# If you have some problem
+# If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
 
