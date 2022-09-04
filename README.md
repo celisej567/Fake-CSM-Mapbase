@@ -5,6 +5,8 @@ Recreated env_cascade_light from CS GO based on env_projectedtexture and Real CS
 
 You can change csm settings in console, just type `csm_`.
 
+`If you know how to fix bugs of some visual shit dont be shy and tell me about it`
+
 # Features
 - Partial compatibility with CSGO.
 
