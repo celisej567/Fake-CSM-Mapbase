@@ -22,7 +22,7 @@
 	input Enable(void)		: "Turn on the texture"
 	input Disable(void)		: "Turn off the texture"
 	input EnableShadows(bool)		: "Turn off the shadows"
-	input SpotlightTexture(string) : "Change texture"
+	input Texture(string) : "Change texture"
 	input LightColor(color255) : "Set the light color."
 	input SetAngles(string) : "Set the sun direction."
 ]
