@@ -96,6 +96,15 @@ private:
 	ClientShadowHandle_t m_LightHandle;
 
 	EHANDLE	m_hTargetEntity;
+	color32	m_LightColor;
+
+#ifdef MAPBASE
+	float m_flBrightnessScale;
+	float m_flCurrentBrightnessScale;
+#endif
+	Vector m_CurrentLinearFloatLightColor;
+	float m_flCurrentLinearFloatLightAlpha;
+	float m_flColorTransitionTime;
 
 	void updatePos();
 	CBaseEntity* pEntity = NULL;
@@ -121,6 +130,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_EnvCascadeLight, DT_EnvCascadeLight, CEnvCascadeLight
 	RecvPropFloat(	 RECVINFO( m_flLightFOV )		),
 	RecvPropBool(	 RECVINFO( m_bEnableShadows )	),
 	RecvPropBool(	 RECVINFO( m_bLightOnlyTarget ) ),
+	RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32), //i have fukin lighting
 	RecvPropBool(	 RECVINFO( m_bLightWorld )		),
 	RecvPropBool(	 RECVINFO( m_bCameraSpace )		),
 	RecvPropVector(	 RECVINFO( m_LinearFloatLightColor )		),
@@ -134,7 +144,6 @@ END_RECV_TABLE()
 
 C_EnvCascadeLight::C_EnvCascadeLight( void )
 {
-	
 	m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
 }
 
@@ -158,7 +167,7 @@ void C_EnvCascadeLight::updatePos()
 {
 	if (firstUpdate)
 	{
-		m_flNearZ = 4000;
+		m_flNearZ = 5000;
 		m_flFarZ = 16000;
 	}
 }
@@ -170,10 +179,11 @@ void C_EnvCascadeLight::updatePos()
 void C_EnvCascadeLight::OnDataChanged( DataUpdateType_t updateType )
 {
 	UpdateLight( true );
+
 	BaseClass::OnDataChanged( updateType );
 }
 
-
+ConVar csm_intensity("csm_intensity","1");
 
 void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 {
@@ -237,6 +247,46 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	}
 
 
+	Vector vLinearFloatLightColor(m_LightColor.r, m_LightColor.g, m_LightColor.b);
+	float flLinearFloatLightAlpha = m_LightColor.a;
+
+#ifdef MAPBASE
+	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
+	{
+		if (m_flColorTransitionTime != 0.0f)
+		{
+			float flColorTransitionSpeed = gpGlobals->frametime * m_flColorTransitionTime * 255.0f;
+
+			m_CurrentLinearFloatLightColor.x = Approach(vLinearFloatLightColor.x, m_CurrentLinearFloatLightColor.x, flColorTransitionSpeed);
+			m_CurrentLinearFloatLightColor.y = Approach(vLinearFloatLightColor.y, m_CurrentLinearFloatLightColor.y, flColorTransitionSpeed);
+			m_CurrentLinearFloatLightColor.z = Approach(vLinearFloatLightColor.z, m_CurrentLinearFloatLightColor.z, flColorTransitionSpeed);
+			m_flCurrentLinearFloatLightAlpha = Approach(flLinearFloatLightAlpha, m_flCurrentLinearFloatLightAlpha, flColorTransitionSpeed);
+			//m_flCurrentBrightnessScale = Approach(m_flBrightnessScale, m_flCurrentBrightnessScale, flColorTransitionSpeed);
+		}
+		else
+		{
+			// Just do it instantly
+			m_CurrentLinearFloatLightColor.x = vLinearFloatLightColor.x;
+			m_CurrentLinearFloatLightColor.y = vLinearFloatLightColor.y;
+			m_CurrentLinearFloatLightColor.z = vLinearFloatLightColor.z;
+			m_flCurrentLinearFloatLightAlpha = flLinearFloatLightAlpha;
+			//m_flCurrentBrightnessScale = m_flBrightnessScale;
+		}
+	}
+#else
+	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
+	{
+		float flColorTransitionSpeed = gpGlobals->frametime * m_flColorTransitionTime * 255.0f;
+
+		m_CurrentLinearFloatLightColor.x = Approach(vLinearFloatLightColor.x, m_CurrentLinearFloatLightColor.x, flColorTransitionSpeed);
+		m_CurrentLinearFloatLightColor.y = Approach(vLinearFloatLightColor.y, m_CurrentLinearFloatLightColor.y, flColorTransitionSpeed);
+		m_CurrentLinearFloatLightColor.z = Approach(vLinearFloatLightColor.z, m_CurrentLinearFloatLightColor.z, flColorTransitionSpeed);
+		m_flCurrentLinearFloatLightAlpha = Approach(flLinearFloatLightAlpha, m_flCurrentLinearFloatLightAlpha, flColorTransitionSpeed);
+	}
+#endif
+
+
+
 	state.m_fHorizontalFOVDegrees = m_flLightFOV;
 	state.m_fVerticalFOVDegrees = m_flLightFOV;
 
@@ -246,12 +296,23 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	state.m_fQuadraticAtten = 0.0;
 	state.m_fLinearAtten = 100;
 	state.m_fConstantAtten = 0.0f;
-	state.m_Color[0] = m_LinearFloatLightColor.x;
-	state.m_Color[1] = m_LinearFloatLightColor.y;
-	state.m_Color[2] = m_LinearFloatLightColor.z;
+	//state.m_Color[0] = m_LinearFloatLightColor.x;
+	//state.m_Color[1] = m_LinearFloatLightColor.y;
+	//state.m_Color[2] = m_LinearFloatLightColor.z;
+
+#ifdef MAPBASE
+	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
+	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
+	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
+	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
+#else
+	state.m_Color[0] = m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * csm_intensity.GetFloat();
+	state.m_Color[1] = m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * csm_intensity.GetFloat();
+	state.m_Color[2] = m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * csm_intensity.GetFloat();
+#endif
+
 	state.m_Color[3] = m_flAmbient; // fixme: need to make ambient work m_flAmbient;
 	state.m_NearZ = m_flNearZ;
-	
 	state.m_FarZ = m_flFarZ;
 	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
 	state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
@@ -342,6 +403,16 @@ private:
 
 	ClientShadowHandle_t m_LightHandle;
 
+	color32	m_LightColor;
+
+#ifdef MAPBASE
+	float m_flBrightnessScale;
+	float m_flCurrentBrightnessScale;
+#endif
+	Vector m_CurrentLinearFloatLightColor;
+	float m_flCurrentLinearFloatLightAlpha;
+	float m_flColorTransitionTime;
+
 	EHANDLE	m_hTargetEntity;
 	CBaseEntity* pEntity = NULL;
 	bool	firstUpdate = true;
@@ -361,6 +432,7 @@ private:
 };
 
 IMPLEMENT_CLIENTCLASS_DT(C_EnvCascadeLightSecond, DT_EnvCascadeLightSecond, CEnvCascadeLightSecond)
+RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),
 RecvPropEHandle(RECVINFO(m_hTargetEntity)),
 RecvPropBool(RECVINFO(m_bState)),
 RecvPropFloat(RECVINFO(m_flLightFOV)),
@@ -463,6 +535,45 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 		AngleVectors(GetAbsAngles(), &vForward, &vRight, &vUp);
 	}
 
+	Vector vLinearFloatLightColor(m_LightColor.r, m_LightColor.g, m_LightColor.b);
+	float flLinearFloatLightAlpha = m_LightColor.a;
+
+#ifdef MAPBASE
+	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
+	{
+		if (m_flColorTransitionTime != 0.0f)
+		{
+			float flColorTransitionSpeed = gpGlobals->frametime * m_flColorTransitionTime * 255.0f;
+
+			m_CurrentLinearFloatLightColor.x = Approach(vLinearFloatLightColor.x, m_CurrentLinearFloatLightColor.x, flColorTransitionSpeed);
+			m_CurrentLinearFloatLightColor.y = Approach(vLinearFloatLightColor.y, m_CurrentLinearFloatLightColor.y, flColorTransitionSpeed);
+			m_CurrentLinearFloatLightColor.z = Approach(vLinearFloatLightColor.z, m_CurrentLinearFloatLightColor.z, flColorTransitionSpeed);
+			m_flCurrentLinearFloatLightAlpha = Approach(flLinearFloatLightAlpha, m_flCurrentLinearFloatLightAlpha, flColorTransitionSpeed);
+			//m_flCurrentBrightnessScale = Approach(m_flBrightnessScale, m_flCurrentBrightnessScale, flColorTransitionSpeed);
+		}
+		else
+		{
+			// Just do it instantly
+			m_CurrentLinearFloatLightColor.x = vLinearFloatLightColor.x;
+			m_CurrentLinearFloatLightColor.y = vLinearFloatLightColor.y;
+			m_CurrentLinearFloatLightColor.z = vLinearFloatLightColor.z;
+			m_flCurrentLinearFloatLightAlpha = flLinearFloatLightAlpha;
+			//m_flCurrentBrightnessScale = m_flBrightnessScale;
+		}
+	}
+#else
+	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
+	{
+		float flColorTransitionSpeed = gpGlobals->frametime * m_flColorTransitionTime * 255.0f;
+
+		m_CurrentLinearFloatLightColor.x = Approach(vLinearFloatLightColor.x, m_CurrentLinearFloatLightColor.x, flColorTransitionSpeed);
+		m_CurrentLinearFloatLightColor.y = Approach(vLinearFloatLightColor.y, m_CurrentLinearFloatLightColor.y, flColorTransitionSpeed);
+		m_CurrentLinearFloatLightColor.z = Approach(vLinearFloatLightColor.z, m_CurrentLinearFloatLightColor.z, flColorTransitionSpeed);
+		m_flCurrentLinearFloatLightAlpha = Approach(flLinearFloatLightAlpha, m_flCurrentLinearFloatLightAlpha, flColorTransitionSpeed);
+	}
+#endif
+
+
 
 	state.m_fHorizontalFOVDegrees = m_flLightFOV;
 	state.m_fVerticalFOVDegrees = m_flLightFOV;
@@ -473,10 +584,24 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	state.m_fQuadraticAtten = 0.0;
 	state.m_fLinearAtten = 100;
 	state.m_fConstantAtten = 0.0f;
-	state.m_Color[0] = m_LinearFloatLightColor.x;
-	state.m_Color[1] = m_LinearFloatLightColor.y;
-	state.m_Color[2] = m_LinearFloatLightColor.z;
+	//state.m_Color[0] = m_LinearFloatLightColor.x;
+	//state.m_Color[1] = m_LinearFloatLightColor.y;
+	//state.m_Color[2] = m_LinearFloatLightColor.z;
+
+#ifdef MAPBASE
+	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
+	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * ConVarRef("csm_second_intensity").GetFloat();
+	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * ConVarRef("csm_second_intensity").GetFloat();
+	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * ConVarRef("csm_second_intensity").GetFloat();
+#else
+	state.m_Color[0] = m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * ConVarRef("csm_second_intensity").GetFloat();
+	state.m_Color[1] = m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * ConVarRef("csm_second_intensity").GetFloat();
+	state.m_Color[2] = m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * ConVarRef("csm_second_intensity").GetFloat();
+#endif
+
 	state.m_Color[3] = 0.0f; // fixme: need to make ambient work m_flAmbient;
+	m_flNearZ = 5000;
+	m_flFarZ = 16000;
 	state.m_NearZ = m_flNearZ;
 	state.m_FarZ = m_flFarZ;
 	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
@@ -546,6 +671,8 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	//mat_slopescaledepthbias_shadowmap.SetValue("4");
 	//mat_depthbias_shadowmap.SetValue("0.00001");
 	scissor.SetValue("0");
+
+
 
 }
 

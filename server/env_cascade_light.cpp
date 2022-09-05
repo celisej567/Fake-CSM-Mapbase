@@ -105,8 +105,10 @@ public:
 
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
 	CNetworkVector(m_LinearFloatLightColor);
+	CNetworkColor32(m_LightColor);
 
 private:
+	
 	CNetworkVar(bool, m_bState);
 	CNetworkVar(float, m_flLightFOV);
 	CNetworkVar(bool, m_bEnableShadows);
@@ -142,6 +144,7 @@ DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLightSecond, DT_EnvCascadeLightSecond)
+SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt),
 SendPropEHandle(SENDINFO(m_hTargetEntity)),
 SendPropBool(SENDINFO(m_bState)),
 SendPropFloat(SENDINFO(m_flLightFOV)),
@@ -163,6 +166,11 @@ END_SEND_TABLE()
 //-----------------------------------------------------------------------------
 CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
 {
+#ifdef MAPBASE
+	m_LightColor.Init(255, 255, 255, 255);
+#else
+	m_LightColor.Init(255, 255, 255, 1);
+#endif
 	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
@@ -262,12 +270,15 @@ public:
 	void InputSetSpotlightTexture(inputdata_t& inputdata);
 	void InputSetAmbient(inputdata_t& inputdata);
 
+	void InputSetAngles(inputdata_t& inputdata);
 	void InitialThink(void);
 
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
 
 private:
+	CNetworkColor32(m_LightColor);
 	CLightOrigin* pEnv;
+	CEnvCascadeLightSecond* SecondCSM;
 	CNetworkVar(bool, m_bState);
 	CNetworkVar(float, m_flLightFOV);
 	CNetworkVar(bool, EnableAngleFromEnv);
@@ -282,6 +293,7 @@ private:
 	CNetworkVar(float, m_flNearZ);
 	CNetworkVar(float, m_flFarZ);
 	CNetworkVar(int, m_nShadowQuality);
+
 };
 
 LINK_ENTITY_TO_CLASS(env_cascade_light, CEnvCascadeLight);
@@ -302,31 +314,37 @@ DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
 DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_KEYFIELD(EnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
 
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOn", InputTurnOn),
-DEFINE_INPUTFUNC(FIELD_VOID, "TurnOff", InputTurnOff),
+DEFINE_INPUTFUNC(FIELD_VOID, "Enable", InputTurnOn),
+DEFINE_INPUTFUNC(FIELD_VOID, "Disable", InputTurnOff),
 DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
 // this is broken . . need to be able to set color and intensity like light_dynamic
 //	DEFINE_INPUTFUNC( FIELD_COLOR32, "LightColor", InputSetLightColor ),
+
+DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
 DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
-DEFINE_INPUTFUNC(FIELD_STRING, "SpotlightTexture", InputSetSpotlightTexture),
+DEFINE_INPUTFUNC(FIELD_STRING, "Texture", InputSetSpotlightTexture),
+DEFINE_INPUTFUNC(FIELD_STRING, "SetAngles", InputSetAngles),
 DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLight, DT_EnvCascadeLight)
-SendPropEHandle(SENDINFO(m_hTargetEntity)),
-SendPropBool(SENDINFO(m_bState)),
-SendPropFloat(SENDINFO(m_flLightFOV)),
-SendPropBool(SENDINFO(m_bEnableShadows)),
-SendPropBool(SENDINFO(m_bLightOnlyTarget)),
-SendPropBool(SENDINFO(m_bLightWorld)),
-SendPropBool(SENDINFO(m_bCameraSpace)),
-SendPropVector(SENDINFO(m_LinearFloatLightColor)),
-SendPropFloat(SENDINFO(m_flAmbient)),
-SendPropString(SENDINFO(m_SpotlightTextureName)),
-SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
-SendPropFloat(SENDINFO(m_flNearZ), 16, SPROP_ROUNDDOWN, 0.0f, 500.0f),
-SendPropFloat(SENDINFO(m_flFarZ), 18, SPROP_ROUNDDOWN, 0.0f, 1500.0f),
-SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED)  // Just one bit for now
+
+	SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt),
+
+	SendPropEHandle(SENDINFO(m_hTargetEntity)),
+	SendPropBool(SENDINFO(m_bState)),
+	SendPropFloat(SENDINFO(m_flLightFOV)),
+	SendPropBool(SENDINFO(m_bEnableShadows)),
+	SendPropBool(SENDINFO(m_bLightOnlyTarget)),
+	SendPropBool(SENDINFO(m_bLightWorld)),
+	SendPropBool(SENDINFO(m_bCameraSpace)),
+	SendPropVector(SENDINFO(m_LinearFloatLightColor)),
+	SendPropFloat(SENDINFO(m_flAmbient)),
+	SendPropString(SENDINFO(m_SpotlightTextureName)),
+	SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
+	SendPropFloat(SENDINFO(m_flNearZ), 16, SPROP_ROUNDDOWN, 0.0f, 500.0f),
+	SendPropFloat(SENDINFO(m_flFarZ), 18, SPROP_ROUNDDOWN, 0.0f, 1500.0f),
+	SendPropInt(SENDINFO(m_nShadowQuality), 1, SPROP_UNSIGNED)  // Just one bit for now
 END_SEND_TABLE()
 
 //-----------------------------------------------------------------------------
@@ -334,6 +352,11 @@ END_SEND_TABLE()
 //-----------------------------------------------------------------------------
 CEnvCascadeLight::CEnvCascadeLight(void)
 {
+#ifdef MAPBASE
+	m_LightColor.Init(255, 255, 255, 255);
+#else
+	m_LightColor.Init(255, 255, 255, 1);
+#endif
 	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
@@ -371,7 +394,7 @@ void CEnvCascadeLight::Preparation()
 		//if second csm is exist
 		if (CSMSecond)
 		{
-			CEnvCascadeLightSecond* SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);	
+			SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);	
 			SecondCSM->SetAbsAngles(GetAbsAngles());
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
@@ -430,7 +453,9 @@ void UTIL_ColorStringToLinearFloatColorCSMFake(Vector& color, const char* pStrin
 
 bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 {
-	if (FStrEq(szKeyName, "lightcolor"))
+
+	if (FStrEq(szKeyName, "lightcolor") || FStrEq(szKeyName, "color"))
+
 	{
 		Vector tmp;
 		UTIL_ColorStringToLinearFloatColorCSMFake(tmp, szValue);
@@ -460,10 +485,6 @@ void CEnvCascadeLight::InputSetEnableShadows(inputdata_t& inputdata)
 	m_bEnableShadows = inputdata.value.Bool();
 }
 
-//void CEnvProjectedTexture::InputSetLightColor( inputdata_t &inputdata )
-//{
-	//m_cLightColor = inputdata.value.Color32();
-//}
 
 void CEnvCascadeLight::InputSetAmbient(inputdata_t& inputdata)
 {
@@ -491,12 +512,27 @@ void CEnvCascadeLight::Activate(void)
 void CEnvCascadeLight::InitialThink(void)
 {
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
-
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	curFOV.SetValue(defFOV.GetFloat() * bibigon);
 	m_flLightFOV = curFOV.GetFloat();
-	//if(pEnv != NULL)
-	//SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
+}
+
+void CEnvCascadeLight::InputSetAngles(inputdata_t& inputdata)
+{
+	const char* pAngles = inputdata.value.String();
+
+	QAngle angles;
+	UTIL_StringToVector(angles.Base(), pAngles); 
+	
+	pEnv->SetAbsAngles(angles);
+	
+}
+
+void CEnvCascadeLight::InputSetLightColor(inputdata_t& inputdata)
+{
+	m_LightColor = inputdata.value.Color32();
+	SecondCSM->m_LightColor = inputdata.value.Color32();
+	//m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
 }
 
 int CEnvCascadeLight::UpdateTransmitState()

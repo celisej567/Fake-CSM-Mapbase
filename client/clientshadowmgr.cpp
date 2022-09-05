@@ -1396,13 +1396,7 @@ bool CClientShadowMgr::Init()
 
 	SetShadowBlobbyCutoffArea( 0.005 );
 
-#ifndef MAPBASE
-	bool bTools = CommandLine()->CheckParm( "-tools" ) != NULL;
-	m_nMaxDepthTextureShadows = bTools ? 4 : 1;	// Just one shadow depth texture in games, more in tools
-#else
-	// 5 lets mappers use up to 4 shadow-casting projected textures, which is better than 3.
 	m_nMaxDepthTextureShadows = pr_max.GetInt();
-#endif
 
 	bool bLowEnd = ( g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 80 );
 
