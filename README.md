@@ -8,7 +8,7 @@ You can change csm settings in console, just type `csm_`.
 `If you know how to fix bugs or some visual shit dont be shy and tell me about it`
 
 |    Game    |  Can Work  |
-|------------|-----------:|
+|----------------|---------------:|
 |CSS         |     NO     |
 |Sdk 2013    |    Yes     |
 
