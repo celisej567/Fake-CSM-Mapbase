@@ -45,6 +45,7 @@ here is example
 
 ![Alt-текст](https://github.com/celisej567/Fake-CSM-Source-2013/blob/main/example.png "")
 
+``IF THIS IS WORKS BAD YOU NEED TO FIND RIGHT ANGLE BY YOURSELF!``
 
 # If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
