@@ -23,12 +23,12 @@ static ConVarRef mat_depthbias_shadowmap("mat_depthbias_shadowmap");
 static ConVar scissor("r_flashlightscissor", "0");
 
 #ifdef MAPBASE
-static ConVar csm_ortho("csm_ortho","0", 0, "Turn light into ortho. Im lazy right now to make this works fine");
-ConVar csm_ortho_nearz("csm_ortho_nearz", "512");
-ConVar csm_ortho_left("csm_ortho_left", "-1000");
-ConVar csm_ortho_top("csm_ortho_top", "-1000");
-ConVar csm_ortho_bottom("csm_ortho_bottom", "1000");
-ConVar csm_ortho_right("csm_ortho_right", "1000");
+//static ConVar csm_ortho("csm_ortho","0", 0, "Turn light into ortho. Im lazy right now to make this works fine");
+//ConVar csm_ortho_nearz("csm_ortho_nearz", "512");
+//ConVar csm_ortho_left("csm_ortho_left", "-1000");
+//ConVar csm_ortho_top("csm_ortho_top", "-1000");
+//ConVar csm_ortho_bottom("csm_ortho_bottom", "1000");
+//ConVar csm_ortho_right("csm_ortho_right", "1000");
 //ConVar csm_test_color_interpolation("csm_test_color_interpolation","0"); //я не помню что она делает, но она определённо этого не делает
 #endif
 
@@ -68,7 +68,7 @@ void C_LightOrigin::Simulate()
 	BaseClass::Simulate();
 }
 
-ConVar bebra("csm_filter", "1");
+ConVar bebra("csm_filter", "1"); //if you have r_flashlightdepthres 4096 then better to change 0.5
 
 //-----------------------------------------------------------------------------
 // Purpose: main csm code	
