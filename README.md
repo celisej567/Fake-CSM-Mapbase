@@ -11,6 +11,7 @@ You can change csm settings in console, just type `csm_`.
 |----------------|---------------:|
 |CSS         |     NO     |
 |Sdk 2013 SP    |    Yes     |
+|Sdk 2013 MP | Yes |
 
 
 
