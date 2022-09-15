@@ -10,7 +10,8 @@ You can change csm settings in console, just type `csm_`.
 |    Game    |  Can Work  |
 |----------------|---------------:|
 |CSS         |     NO     |
-|Sdk 2013    |    Yes (tested for sp)     |
+|Sdk 2013 SP    |    Yes     |
+
 
 
 # Features
