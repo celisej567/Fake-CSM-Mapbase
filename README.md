@@ -7,6 +7,14 @@ You can change csm settings in console, just type `csm_`.
 
 `If you know how to fix bugs or some visual shit dont be shy and tell me about it`
 
+|    Game    |  Can Work  |
+|----------------|---------------:|
+|CSS         |     NO     |
+|Sdk 2013 SP    |    Yes     |
+|Sdk 2013 MP | Yes |
+
+
+
 # Features
 - Partial compatibility with CSGO.
 
@@ -45,6 +53,7 @@ here is example
 
 ![Alt-текст](https://github.com/celisej567/Fake-CSM-Source-2013/blob/main/example.png "")
 
+``IF THIS IS WORKS BAD YOU NEED TO FIND RIGHT ANGLE BY YOURSELF!``
 
 # If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
