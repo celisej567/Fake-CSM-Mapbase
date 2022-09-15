@@ -38,7 +38,7 @@ Then copy materials folder to the your mod folder.
 
 Your `mat_depthbias_shadowmap` better should be `0.00001`, `mat_slopescaledepthbias_shadowmap` should be `4` and `r_flashlightdepthres` should be more then `2048`. Its only for better visual and you not literally should do that.
 
-If you have `r_flashlightdepthres 4096` then better change `csm_filter` to `0.5`
+If you have `r_flashlightdepthres 4096` then better change `csm_filter` to `0.5`.
 
 # How to add this light in your map
 Copy csm.fgd from fgd folder to bin folder in SDK Base 2013.
