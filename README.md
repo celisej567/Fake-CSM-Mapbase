@@ -14,6 +14,8 @@ You can change csm settings in console, just type `csm_`.
 |Sdk 2013 MP | Yes |
 
 
+Here is video demonstration: https://www.youtube.com/watch?v=3ERKBZsuLR4
+
 
 # Features
 - Partial compatibility with CSGO.
