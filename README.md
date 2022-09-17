@@ -15,6 +15,7 @@ You can change csm settings in console, just type `csm_`.
 
 
 Here is video demonstration: https://www.youtube.com/watch?v=3ERKBZsuLR4
+(Bad fps because i have bad pc, not because of lightning)
 
 
 # Features
