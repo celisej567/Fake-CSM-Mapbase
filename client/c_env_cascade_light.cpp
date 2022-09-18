@@ -49,7 +49,7 @@ public:
 
 private:
 	Vector LightEnvVector;
-	QAngle LightEnvAngle;
+	//QAngle LightEnvAngle;
 };
 
 IMPLEMENT_CLIENTCLASS_DT(C_LightOrigin, DT_LightOrigin, CLightOrigin)
@@ -68,7 +68,8 @@ void C_LightOrigin::Simulate()
 	BaseClass::Simulate();
 }
 
-ConVar bebra("csm_filter", "1"); //if you have r_flashlightdepthres 4096 then better to change 0.5
+ConVar bebra("csm_filter", "1"); //if you have r_flashlightdepthres 4096 then better to change this value to 0.5
+
 
 //-----------------------------------------------------------------------------
 // Purpose: main csm code	
@@ -105,10 +106,6 @@ private:
 	Vector m_CurrentLinearFloatLightColor;
 	float m_flCurrentLinearFloatLightAlpha;
 	float m_flColorTransitionTime;
-
-	void updatePos();
-	CBaseEntity* pEntity = NULL;
-	bool	firstUpdate = true;
 	bool	m_bState;
 	float	m_flLightFOV;
 	bool	m_bEnableShadows;
@@ -160,15 +157,6 @@ void C_EnvCascadeLight::ShutDownLightHandle( void )
 	{
 		g_pClientShadowMgr->DestroyFlashlight( m_LightHandle );
 		m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
-	}
-}
-
-void C_EnvCascadeLight::updatePos()
-{
-	if (firstUpdate)
-	{
-		m_flNearZ = 5000;
-		m_flFarZ = 16000;
 	}
 }
 
@@ -321,20 +309,6 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
-#ifdef MAPBASE
-
-	state.m_bOrtho = csm_ortho.GetBool();
-	if (state.m_bOrtho)
-	{
-		state.m_fOrthoLeft = csm_ortho_left.GetInt();
-		state.m_fOrthoTop = csm_ortho_top.GetInt();
-		state.m_fOrthoRight = csm_ortho_right.GetInt();
-		state.m_fOrthoBottom = csm_ortho_bottom.GetInt();
-
-		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
-	}
-#endif // MAPBASE
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
 	{
@@ -371,8 +345,6 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 void C_EnvCascadeLight::Simulate( void )
 {
 	UpdateLight( true );
-	updatePos();
-	firstUpdate = false;
 	BaseClass::Simulate();
 }
 
@@ -613,7 +585,7 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
 	
 #ifdef MAPBASE
-
+	/*
 	state.m_bOrtho = csm_ortho.GetBool();
 	if(state.m_bOrtho)
 	{
@@ -627,7 +599,7 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 		state.m_fLinearAtten = ConVarRef("csm_current_distance").GetInt() * 2;
 		state.m_FarZAtten = ConVarRef("csm_current_distance").GetInt() * 2;
 	}
-	
+	*/
 #endif
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
