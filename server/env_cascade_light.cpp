@@ -7,9 +7,12 @@
 #include "cbase.h"
 #include "shareddefs.h"
 #include "lights.h"
+#include "tier1/utlstring.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
+
+
 
 #define ENV_CASCADE_STARTON			(1<<0)
 
@@ -18,6 +21,7 @@ static ConVar curdist("csm_current_distance","14000", 0, "Current Z distance. Yo
 static ConVar defFOV("csm_default_fov","15", FCVAR_DEVELOPMENTONLY, "Default FOV. Used for some fov calculations. Please dont change");
 static ConVar curFOV("csm_current_fov","15", 0, "Current FOV. You can change it");
 static ConVar csm_second_fov("csm_second_fov", "26", FCVAR_NONE ,"FOV of the second csm.");
+ConVar csm_enable("csm_enable", "1");
 
 class CLightOrigin : public CPointEntity
 {
@@ -65,7 +69,7 @@ void CLightOrigin::Spawn()
 			CEnvLight* pEnv = dynamic_cast<CEnvLight*>(pEntity);
 
 			QAngle bb = pEnv->GetAbsAngles();
-			bb.x = bb.x;
+			//bb.x = bb.x;
 			SetAbsAngles(bb);
 			
 			ConColorMsg(Color(0,230,0), "light_environment Founded!\n");
@@ -171,7 +175,7 @@ CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
 #else
 	m_LightColor.Init(255, 255, 255, 1);
 #endif
-	m_bState = true;
+	m_bState = csm_enable.GetBool();
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
 	m_bLightOnlyTarget = false;
@@ -232,6 +236,7 @@ void CEnvCascadeLightSecond::Activate(void)
 
 void CEnvCascadeLightSecond::InitialThink(void)
 {
+	m_bState = csm_enable.GetBool();
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	m_flLightFOV = csm_second_fov.GetFloat() * bibigon;
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
@@ -263,21 +268,26 @@ public:
 	void Spawn();
 	void Preparation();
 
+	//Inputs
 	void InputTurnOn(inputdata_t& inputdata);
 	void InputTurnOff(inputdata_t& inputdata);
 	void InputSetEnableShadows(inputdata_t& inputdata);
 	void InputSetLightColor( inputdata_t &inputdata );
 	void InputSetSpotlightTexture(inputdata_t& inputdata);
 	void InputSetAmbient(inputdata_t& inputdata);
-
 	void InputSetAngles(inputdata_t& inputdata);
+	void InputAddAngles(inputdata_t& inputdata);
+	void InputResetAngles(inputdata_t& inputdata);
+
 	void InitialThink(void);
+
+
 
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
 
 private:
 	CNetworkColor32(m_LightColor);
-	CLightOrigin* pEnv;
+	CLightOrigin* csm_origin;
 	CEnvCascadeLightSecond* SecondCSM;
 	CNetworkVar(bool, m_bState);
 	CNetworkVar(float, m_flLightFOV);
@@ -294,6 +304,8 @@ private:
 	CNetworkVar(float, m_flFarZ);
 	CNetworkVar(int, m_nShadowQuality);
 
+	QAngle DefaultAngle = QAngle(0, 0, 0);
+	QAngle CurrentAngle = QAngle(0, 0, 0);
 };
 
 LINK_ENTITY_TO_CLASS(env_cascade_light, CEnvCascadeLight);
@@ -314,16 +326,18 @@ DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
 DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_KEYFIELD(EnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
 
+
+//Inputs
 DEFINE_INPUTFUNC(FIELD_VOID, "Enable", InputTurnOn),
 DEFINE_INPUTFUNC(FIELD_VOID, "Disable", InputTurnOff),
 DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
-// this is broken . . need to be able to set color and intensity like light_dynamic
-//	DEFINE_INPUTFUNC( FIELD_COLOR32, "LightColor", InputSetLightColor ),
-
 DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
 DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
 DEFINE_INPUTFUNC(FIELD_STRING, "Texture", InputSetSpotlightTexture),
 DEFINE_INPUTFUNC(FIELD_STRING, "SetAngles", InputSetAngles),
+DEFINE_INPUTFUNC(FIELD_STRING, "AddAngles", InputAddAngles),
+DEFINE_INPUTFUNC(FIELD_VOID, "ResetAngles", InputResetAngles),
+
 DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
@@ -357,7 +371,7 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 #else
 	m_LightColor.Init(255, 255, 255, 1);
 #endif
-	m_bState = true;
+	m_bState = csm_enable.GetBool();
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
 	m_bLightOnlyTarget = false;
@@ -372,8 +386,11 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 	m_flNearZ = 8000.0f;
 	m_flFarZ = 16000.0f;
 	m_nShadowQuality = 0;
+
+	
 }
 ConVar csm_second_intensity("csm_second_intensity", "2");
+
 void CEnvCascadeLight::Preparation()
 {
 	CreateEntityByName("csmorigin");
@@ -383,17 +400,18 @@ void CEnvCascadeLight::Preparation()
 	CBaseEntity* CSMSecond = NULL;
 	
 	CSMOrigin = gEntList.FindEntityByClassname(CSMOrigin, "csmorigin");
+	CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
 	//if origin is exist
 	if (CSMOrigin)
 	{
 
-		pEnv = dynamic_cast<CLightOrigin*>(CSMOrigin);
-
-
-		CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
+		csm_origin = dynamic_cast<CLightOrigin*>(CSMOrigin);
 		//if second csm is exist
 		if (CSMSecond)
 		{
+			//if (GetBaseEntity()->GetEntityNameAsCStr() != NULL)
+				//CSMSecond->SetNameAsCStr(GetBaseEntity()->GetEntityNameAsCStr() + '_' + 's' + 'e' + 'c' + 'o' + 'n' + 'd');
+
 			SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);	
 			SecondCSM->SetAbsAngles(GetAbsAngles());
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
@@ -404,25 +422,33 @@ void CEnvCascadeLight::Preparation()
 			DispatchSpawn(SecondCSM);
 		}
 
-		SetParent(pEnv, 1);
-		SetAbsOrigin(Vector(pEnv->GetAbsOrigin().x, pEnv->GetAbsOrigin().y, pEnv->GetAbsOrigin().z + curdist.GetInt()));
+		SetParent(csm_origin, 1);
+		SetAbsOrigin(Vector(csm_origin->GetAbsOrigin().x, csm_origin->GetAbsOrigin().y, csm_origin->GetAbsOrigin().z + curdist.GetInt()));
 
 		if (EnableAngleFromEnv)
 		{
-			pEnv->angFEnv = true;
+			csm_origin->angFEnv = true;
 			SetLocalAngles(QAngle(90, 0, 0));
-			
 		}
 		else
 		{
-			pEnv->SetAbsAngles(QAngle((GetLocalAngles().x - 90), GetLocalAngles().y, -GetLocalAngles().z));
-
-			Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
-
+			csm_origin->SetAbsAngles(QAngle((GetLocalAngles().x - 90), GetLocalAngles().y, -GetLocalAngles().z));
+			//Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
 			SetLocalAngles(QAngle(90, 0, 0));
 			DevMsg("CSM using light_environment \n");
 		}
-		//DispatchSpawn(CSMSecond);
+
+		//const char* bebra = GetBaseEntity()->GetEntityNameAsCStr();
+		//bebra += '_' + 'o' + 'r' + 'i' + 'g' + 'i' + 'n';
+		
+		//CSMOrigin->SetNameAsCStr(bebra);
+		
+		//ConColorMsg(Color(255,0,0), "CSMOrigin name is " + bebra);
+
+		DefaultAngle = csm_origin->GetAbsAngles();
+		CurrentAngle = csm_origin->GetAbsAngles();
+		
+
 		DispatchSpawn(CSMOrigin);
 	}
 	else
@@ -502,7 +528,6 @@ void CEnvCascadeLight::Activate(void)
 	{
 		m_bState = true;
 	}
-
 	SetThink(&CEnvCascadeLight::InitialThink);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
@@ -511,11 +536,13 @@ void CEnvCascadeLight::Activate(void)
 
 void CEnvCascadeLight::InitialThink(void)
 {
+	m_bState = csm_enable.GetBool();
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	curFOV.SetValue(defFOV.GetFloat() * bibigon);
 	m_flLightFOV = curFOV.GetFloat();
 }
+
 
 void CEnvCascadeLight::InputSetAngles(inputdata_t& inputdata)
 {
@@ -524,8 +551,25 @@ void CEnvCascadeLight::InputSetAngles(inputdata_t& inputdata)
 	QAngle angles;
 	UTIL_StringToVector(angles.Base(), pAngles); 
 	
-	pEnv->SetAbsAngles(angles);
-	
+	CurrentAngle = angles;
+	csm_origin->SetAbsAngles(CurrentAngle);
+}
+
+void CEnvCascadeLight::InputAddAngles(inputdata_t& inputdata)
+{
+	const char* pAngles = inputdata.value.String();
+
+	QAngle angles;
+	UTIL_StringToVector(angles.Base(), pAngles);
+
+	CurrentAngle = CurrentAngle + angles;
+	csm_origin->SetAbsAngles(CurrentAngle);
+}
+
+void CEnvCascadeLight::InputResetAngles(inputdata_t& inputdata)
+{
+	CurrentAngle = DefaultAngle;
+	csm_origin->SetAbsAngles(CurrentAngle);
 }
 
 void CEnvCascadeLight::InputSetLightColor(inputdata_t& inputdata)

@@ -21,6 +21,7 @@
 static ConVarRef mat_slopescaledepthbias_shadowmap("mat_slopescaledepthbias_shadowmap");
 static ConVarRef mat_depthbias_shadowmap("mat_depthbias_shadowmap");
 static ConVar scissor("r_flashlightscissor", "0");
+ConVar csm_enable("csm_enable", "1");
 
 #ifdef MAPBASE
 //static ConVar csm_ortho("csm_ortho","0", 0, "Turn light into ortho. Im lazy right now to make this works fine");
@@ -141,6 +142,7 @@ END_RECV_TABLE()
 
 C_EnvCascadeLight::C_EnvCascadeLight( void )
 {
+	
 	m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
 }
 
@@ -152,10 +154,9 @@ C_EnvCascadeLight::~C_EnvCascadeLight( void )
 
 void C_EnvCascadeLight::ShutDownLightHandle( void )
 {
-	// Clear out the light
-	if( m_LightHandle != CLIENTSHADOW_INVALID_HANDLE )
+	if (m_LightHandle != CLIENTSHADOW_INVALID_HANDLE)
 	{
-		g_pClientShadowMgr->DestroyFlashlight( m_LightHandle );
+		g_pClientShadowMgr->DestroyFlashlight(m_LightHandle);
 		m_LightHandle = CLIENTSHADOW_INVALID_HANDLE;
 	}
 }
@@ -178,11 +179,8 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 	if (m_bState == false)
 	{
-		if (m_LightHandle != CLIENTSHADOW_INVALID_HANDLE)
-		{
-			ShutDownLightHandle();
-		}
-
+		if(m_LightHandle!=CLIENTSHADOW_INVALID_HANDLE)
+		ShutDownLightHandle();
 		return;
 	}
 
@@ -344,7 +342,8 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 void C_EnvCascadeLight::Simulate( void )
 {
-	UpdateLight( true );
+	m_bState = csm_enable.GetBool();
+	UpdateLight(true);
 	BaseClass::Simulate();
 }
 
@@ -435,7 +434,6 @@ C_EnvCascadeLightSecond::~C_EnvCascadeLightSecond(void)
 
 void C_EnvCascadeLightSecond::ShutDownLightHandle(void)
 {
-	// Clear out the light
 	if (m_LightHandle != CLIENTSHADOW_INVALID_HANDLE)
 	{
 		g_pClientShadowMgr->DestroyFlashlight(m_LightHandle);
@@ -454,11 +452,11 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	if (m_bState == false)
 	{
-		if (m_LightHandle != CLIENTSHADOW_INVALID_HANDLE)
-		{
-			ShutDownLightHandle();
-		}
-
+		
+		if(m_LightHandle!=CLIENTSHADOW_INVALID_HANDLE)
+		ShutDownLightHandle();
+		
+		
 		return;
 	}
 
@@ -601,6 +599,7 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	}
 	*/
 #endif
+	
 
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
 	{
@@ -643,14 +642,12 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	//mat_slopescaledepthbias_shadowmap.SetValue("4");
 	//mat_depthbias_shadowmap.SetValue("0.00001");
 	scissor.SetValue("0");
-
-
-
 }
 
 
 void C_EnvCascadeLightSecond::Simulate(void)
 {
+	m_bState = csm_enable.GetBool();
 	UpdateLight(true);
 	BaseClass::Simulate();
 }
