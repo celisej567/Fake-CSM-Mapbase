@@ -308,6 +308,40 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 	state.m_nShadowQuality = m_nShadowQuality; // Allow entity to affect shadow quality
 
+	/*
+	if (csm_ortho.GetBool())
+	{
+		float flOrthoSize = 1000.0f;
+		state.m_bGlobalLight = true;
+		if (flOrthoSize > 0)
+		{
+			state.m_bOrtho = true;
+			state.m_fOrthoLeft = -flOrthoSize;
+			state.m_fOrthoTop = -flOrthoSize;
+			state.m_fOrthoRight = flOrthoSize;
+			state.m_fOrthoBottom = flOrthoSize;
+		}
+		else
+		{
+			state.m_bOrtho = false;
+		}
+
+		vPos.z = 0;
+		state.m_vecLightOrigin = vPos;
+
+		//C_BasePlayer::GetLocalPlayer()->CalcView(vPos, EyeAngles, flZNear, flZFar, flFov);
+		//		Vector vPos = C_BasePlayer::GetLocalPlayer()->GetAbsOrigin();
+
+		//		vPos = Vector( 0.0f, 0.0f, 500.0f );
+		//vPos = (vPos + vSunDirection2D * m_flNorthOffset) - vDirection * m_flSunDistance;
+
+	}
+	else
+	{
+		state.m_vecLightOrigin = vPos;
+	}
+	*/
+
 	if (m_LightHandle == CLIENTSHADOW_INVALID_HANDLE)
 	{
 		m_LightHandle = g_pClientShadowMgr->CreateFlashlight(state);
@@ -332,11 +366,11 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	g_pClientShadowMgr->SetFlashlightLightWorld(m_LightHandle, m_bLightWorld);
 
 
-		g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
+	g_pClientShadowMgr->UpdateProjectedTexture(m_LightHandle, true);
 
-		//mat_slopescaledepthbias_shadowmap.SetValue("4");
-		//mat_depthbias_shadowmap.SetValue("0.00001");
-		scissor.SetValue("0");
+	//mat_slopescaledepthbias_shadowmap.SetValue("4");
+	//mat_depthbias_shadowmap.SetValue("0.00001");
+	scissor.SetValue("0");
 
 }
 
@@ -639,8 +673,6 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 	m_flLightFOV = ConVarRef("csm_second_fov").GetFloat();
 	
-	//mat_slopescaledepthbias_shadowmap.SetValue("4");
-	//mat_depthbias_shadowmap.SetValue("0.00001");
 	scissor.SetValue("0");
 }
 

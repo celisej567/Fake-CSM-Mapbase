@@ -22,6 +22,7 @@ static ConVar defFOV("csm_default_fov","15", FCVAR_DEVELOPMENTONLY, "Default FOV
 static ConVar curFOV("csm_current_fov","15", 0, "Current FOV. You can change it");
 static ConVar csm_second_fov("csm_second_fov", "26", FCVAR_NONE ,"FOV of the second csm.");
 ConVar csm_enable("csm_enable", "1");
+//ConVar csm_ortho("csm_ortho", "0");
 
 class CLightOrigin : public CPointEntity
 {
@@ -398,7 +399,7 @@ void CEnvCascadeLight::Preparation()
 	defFOV.SetValue(m_flLightFOV);
 	CBaseEntity* CSMOrigin = NULL;
 	CBaseEntity* CSMSecond = NULL;
-	
+
 	CSMOrigin = gEntList.FindEntityByClassname(CSMOrigin, "csmorigin");
 	CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "second_csm");
 	//if origin is exist
@@ -407,28 +408,31 @@ void CEnvCascadeLight::Preparation()
 
 		csm_origin = dynamic_cast<CLightOrigin*>(CSMOrigin);
 		//if second csm is exist
+
 		if (CSMSecond)
 		{
-			//if (GetBaseEntity()->GetEntityNameAsCStr() != NULL)
-				//CSMSecond->SetNameAsCStr(GetBaseEntity()->GetEntityNameAsCStr() + '_' + 's' + 'e' + 'c' + 'o' + 'n' + 'd');
 
-			SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);	
+			SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);
 			SecondCSM->SetAbsAngles(GetAbsAngles());
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
 			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * csm_second_intensity.GetFloat();
-			
 
 			DispatchSpawn(SecondCSM);
 		}
 
+
 		SetParent(csm_origin, 1);
+
 		SetAbsOrigin(Vector(csm_origin->GetAbsOrigin().x, csm_origin->GetAbsOrigin().y, csm_origin->GetAbsOrigin().z + curdist.GetInt()));
 
 		if (EnableAngleFromEnv)
 		{
+
+
 			csm_origin->angFEnv = true;
 			SetLocalAngles(QAngle(90, 0, 0));
+
 		}
 		else
 		{
@@ -438,16 +442,11 @@ void CEnvCascadeLight::Preparation()
 			DevMsg("CSM using light_environment \n");
 		}
 
-		//const char* bebra = GetBaseEntity()->GetEntityNameAsCStr();
-		//bebra += '_' + 'o' + 'r' + 'i' + 'g' + 'i' + 'n';
-		
-		//CSMOrigin->SetNameAsCStr(bebra);
-		
-		//ConColorMsg(Color(255,0,0), "CSMOrigin name is " + bebra);
+
 
 		DefaultAngle = csm_origin->GetAbsAngles();
-		CurrentAngle = csm_origin->GetAbsAngles();
-		
+		CurrentAngle = DefaultAngle;
+
 
 		DispatchSpawn(CSMOrigin);
 	}
@@ -455,12 +454,14 @@ void CEnvCascadeLight::Preparation()
 	{
 		Msg("Main csm entity can't find \"csmorigin\" entity!");
 	}
-	
+
 }
 
 void CEnvCascadeLight::Spawn()
 {
+	
 	Preparation();
+
 }
 
 void UTIL_ColorStringToLinearFloatColorCSMFake(Vector& color, const char* pString)
@@ -553,6 +554,7 @@ void CEnvCascadeLight::InputSetAngles(inputdata_t& inputdata)
 	
 	CurrentAngle = angles;
 	csm_origin->SetAbsAngles(CurrentAngle);
+
 }
 
 void CEnvCascadeLight::InputAddAngles(inputdata_t& inputdata)
