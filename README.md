@@ -21,6 +21,8 @@ Here is video demonstration: https://www.youtube.com/watch?v=3ERKBZsuLR4
 (Bad fps because i have bad pc, not because of lightning)
 
 
+Right now im trying to make this work (or look) almost like actual CSM, so work in progress.
+
 # Features
 - Partial compatibility with CSGO.
 
