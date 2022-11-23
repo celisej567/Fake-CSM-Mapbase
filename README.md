@@ -14,6 +14,7 @@ You can change csm settings in console, just type `csm_`.
 |CSS         |     NO     |
 |Sdk 2013 SP    |    Yes     |
 |Sdk 2013 MP | Yes |
+|Linux |looks like its not|
 
 
 Here is video demonstration: https://www.youtube.com/watch?v=3ERKBZsuLR4
