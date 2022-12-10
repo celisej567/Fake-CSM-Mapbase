@@ -18,10 +18,13 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-static ConVarRef mat_slopescaledepthbias_shadowmap("mat_slopescaledepthbias_shadowmap");
-static ConVarRef mat_depthbias_shadowmap("mat_depthbias_shadowmap");
+//ConVar csm_slopescaledepthbias_shadowmap("csm_slopescaledepthbias_shadowmap", "0.00005");
+//ConVar csm_depthbias_shadowmap("csm_depthbias_shadowmap", "4");
+
 static ConVar scissor("r_flashlightscissor", "0");
 ConVar csm_enable("csm_enable", "1");
+//ConVarRef csm_second_intensity("csm_second_intensity");
+ConVar csm_intensity("csm_intensity", "1000");
 
 #ifdef MAPBASE
 //static ConVar csm_ortho("csm_ortho","0", 0, "Turn light into ortho. Im lazy right now to make this works fine");
@@ -172,7 +175,6 @@ void C_EnvCascadeLight::OnDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnDataChanged( updateType );
 }
 
-ConVar csm_intensity("csm_intensity","1");
 
 void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 {
@@ -300,8 +302,8 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	state.m_Color[3] = m_flAmbient; // fixme: need to make ambient work m_flAmbient;
 	state.m_NearZ = m_flNearZ;
 	state.m_FarZ = m_flFarZ;
-	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
-	state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
+	state.m_flShadowSlopeScaleDepthBias = ConVarRef("mat_slopescaledepthbias_shadowmap").GetFloat();//csm_slopescaledepthbias_shadowmap.GetFloat();
+	state.m_flShadowDepthBias = ConVarRef("mat_depthbias_shadowmap").GetFloat();//csm_depthbias_shadowmap.GetFloat();
 	state.m_bEnableShadows = m_bEnableShadows;
 	state.m_pSpotlightTexture = materials->FindTexture(m_SpotlightTextureName, TEXTURE_GROUP_OTHER, false);
 	state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;
@@ -608,8 +610,8 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	m_flFarZ = 16000;
 	state.m_NearZ = m_flNearZ;
 	state.m_FarZ = m_flFarZ;
-	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
-	state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
+	state.m_flShadowSlopeScaleDepthBias = ConVarRef("mat_slopescaledepthbias_shadowmap").GetFloat();//csm_slopescaledepthbias_shadowmap.GetFloat();
+	state.m_flShadowDepthBias = ConVarRef("mat_depthbias_shadowmap").GetFloat();//csm_depthbias_shadowmap.GetFloat();
 	state.m_bEnableShadows = m_bEnableShadows;
 	state.m_pSpotlightTexture = materials->FindTexture(m_SpotlightTextureName, TEXTURE_GROUP_OTHER, false);
 	state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;

@@ -20,8 +20,10 @@ static ConVar defdist("csm_default_distance", "1000", FCVAR_DEVELOPMENTONLY, "De
 static ConVar curdist("csm_current_distance","14000", 0, "Current Z distance. You can change it.");
 static ConVar defFOV("csm_default_fov","15", FCVAR_DEVELOPMENTONLY, "Default FOV. Used for some fov calculations. Please dont change");
 static ConVar curFOV("csm_current_fov","15", 0, "Current FOV. You can change it");
-static ConVar csm_second_fov("csm_second_fov", "26", FCVAR_NONE ,"FOV of the second csm.");
+static ConVar csm_second_fov("csm_second_fov", "25", FCVAR_NONE ,"FOV of the second csm.");
 ConVar csm_enable("csm_enable", "1");
+ConVar csm_second_intensity("csm_second_intensity", "1000");
+
 //ConVar csm_ortho("csm_ortho", "0");
 
 class CLightOrigin : public CPointEntity
@@ -70,7 +72,6 @@ void CLightOrigin::Spawn()
 			CEnvLight* pEnv = dynamic_cast<CEnvLight*>(pEntity);
 
 			QAngle bb = pEnv->GetAbsAngles();
-			//bb.x = bb.x;
 			SetAbsAngles(bb);
 			
 			ConColorMsg(Color(0,230,0), "light_environment Founded!\n");
@@ -126,6 +127,8 @@ private:
 	CNetworkVar(float, m_flNearZ);
 	CNetworkVar(float, m_flFarZ);
 	CNetworkVar(int, m_nShadowQuality);
+
+
 };
 
 LINK_ENTITY_TO_CLASS(second_csm, CEnvCascadeLightSecond);
@@ -390,7 +393,6 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 
 	
 }
-ConVar csm_second_intensity("csm_second_intensity", "2");
 
 void CEnvCascadeLight::Preparation()
 {
