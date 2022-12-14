@@ -12,3 +12,6 @@ Read main branch readme to get more info
 -Added light_env changes to csm.fgd.
 
 `ALSO NOW YOU SHOULD COPY PITCH PARAMETERS EXECLY HOW IT SHOULD BE (PITCH YAW ROLL)`
+
+# If you have some problem or question
+then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
