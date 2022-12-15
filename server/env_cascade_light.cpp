@@ -221,9 +221,19 @@ bool CEnvCascadeLightThird::KeyValue(const char* szKeyName, const char* szValue)
 {
 	if (FStrEq(szKeyName, "lightcolor"))
 	{
-		Vector tmp;
-		UTIL_ColorStringToLinearFloatColorCSMFakeThird(tmp, szValue);	
-		m_LinearFloatLightColor = tmp;
+		float tmp[4];
+		UTIL_StringToFloatArray(tmp, 4, szValue);
+		/*
+		if (tmp[3] <= 0.0f)
+		{
+			tmp[3] = 255.0f;
+		}
+		tmp[3] *= (1.0f / 255.0f);
+		*/
+		m_LightColor.SetR(GammaToLinear(tmp[0]));
+		m_LightColor.SetG(GammaToLinear(tmp[1]));
+		m_LightColor.SetB(GammaToLinear(tmp[2]));
+		m_LightColor.SetA(GammaToLinear(tmp[3]));
 	}
 	else
 	{
@@ -384,9 +394,19 @@ bool CEnvCascadeLightSecond::KeyValue(const char* szKeyName, const char* szValue
 {
 	if (FStrEq(szKeyName, "lightcolor"))
 	{
-		Vector tmp;
-		UTIL_ColorStringToLinearFloatColorCSMFakeSecond(tmp, szValue);
-		m_LinearFloatLightColor = tmp;
+		float tmp[4];
+		UTIL_StringToFloatArray(tmp, 4, szValue);
+		/*
+		if (tmp[3] <= 0.0f)
+		{
+			tmp[3] = 255.0f;
+		}
+		tmp[3] *= (1.0f / 255.0f);
+		*/
+		m_LightColor.SetR(GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3]);
+		m_LightColor.SetG(GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3]);
+		m_LightColor.SetB(GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3]);
+		m_LightColor.SetA(tmp[3]);
 	}
 	else
 	{
@@ -593,7 +613,11 @@ void CEnvCascadeLight::Preparation()
 			SecondCSM->SetAbsAngles(GetAbsAngles());
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
-			SecondCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * ConVarRef("csm_second_intensity").GetFloat();
+
+			SecondCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_second_intensity").GetFloat());
+			SecondCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_second_intensity").GetFloat());
+			SecondCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_second_intensity").GetFloat());
+			SecondCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_second_intensity").GetFloat());
 
 			DispatchSpawn(SecondCSM);
 		}
@@ -610,7 +634,12 @@ void CEnvCascadeLight::Preparation()
 				ThirdCSM->SetAbsAngles(GetAbsAngles());
 				ThirdCSM->SetAbsOrigin(GetAbsOrigin());
 				ThirdCSM->SetParent(GetBaseEntity());
-				ThirdCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * ConVarRef("csm_second_intensity").GetFloat();
+				//ThirdCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * ConVarRef("csm_second_intensity").GetFloat();
+
+				ThirdCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_third_intensity").GetFloat());
+				ThirdCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_third_intensity").GetFloat());
+				ThirdCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_third_intensity").GetFloat());
+				ThirdCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_third_intensity").GetFloat());
 
 				DispatchSpawn(ThirdCSM);
 			}
@@ -623,8 +652,6 @@ void CEnvCascadeLight::Preparation()
 
 		if (EnableAngleFromEnv)
 		{
-
-
 			csm_origin->angFEnv = true;
 			SetLocalAngles(QAngle(90, 0, 0));
 
@@ -677,11 +704,21 @@ bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 {
 
 	if (FStrEq(szKeyName, "lightcolor") || FStrEq(szKeyName, "color"))
-
 	{
-		Vector tmp;
-		UTIL_ColorStringToLinearFloatColorCSMFake(tmp, szValue);
-		m_LinearFloatLightColor = tmp;
+		float tmp[4];
+		UTIL_StringToFloatArray(tmp, 4, szValue);
+		/*
+		if (tmp[3] <= 0.0f)
+		{
+			tmp[3] = 255.0f;
+		}
+		tmp[3] *= (1.0f / 255.0f);
+		*/
+		m_LightColor.SetR(tmp[0]);
+		m_LightColor.SetG(tmp[1]);
+		m_LightColor.SetB(tmp[2]);
+		m_LightColor.SetA(tmp[3]);
+
 	}
 	else
 	{
