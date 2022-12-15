@@ -17,6 +17,13 @@
 		0 : "No"
 	]
 	
+	enablethird(Choices) : "Enable Third level?" : 1 : "Enable Third CSM level? CSM will effect at more distance but its more expensive."  =
+	[
+		1 : "Yes"
+		0 : "No"
+	]
+	
+	
 	ambient(integer)	:"Ambient" : 0 : "idk"
 	
 	input Enable(void)		: "Turn on the texture"
@@ -25,6 +32,8 @@
 	input Texture(string) : "Change texture"
 	input LightColor(color255) : "Set the light color."
 	input SetAngles(string) : "Set the sun direction."
+	input AddAngles(string) : "Add angle for the sun"
+	input ResetAngles(void) : "Reset angle of the sun"
 ]
 
 @PointClass base(Angles) iconsprite("editor/light_env.vmt") = light_environment : 
