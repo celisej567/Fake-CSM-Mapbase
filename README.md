@@ -1,5 +1,5 @@
 # Fake-CSM-Source-2013 Dev mapbase 7.1 branch
-This branch contains some changes for mapbase 7.1 and some test shit.
+This branch contains some changes only for mapbase 7.1 and some test shit.
 
 Read main branch readme to get more info
 
