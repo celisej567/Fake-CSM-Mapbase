@@ -17,5 +17,7 @@ Thanks:
 
 `ALSO NOW YOU SHOULD COPY PITCH PARAMETERS EXECLY HOW IT SHOULD BE (PITCH YAW ROLL)`
 
+If you have `Assert server/baseentity.cpp in 7240 line` you should go to this file and comment it.
+
 # If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
