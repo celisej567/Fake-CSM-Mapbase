@@ -20,6 +20,9 @@ Thanks:
 If you have `Assert server/baseentity.cpp in 7240 line` you should go to this file and comment it. Also comment Warning up there.         
 If you have problems with blend materials, try to make it displacement.
 
+`mat_depthbias_shadowmap should be 0.00001` and `mat_slopescaledepthbias_shadowmap should be 4`      
+This CSM looks better when `r_flashlightdepthres is 4096` 
+
 # How to install
 Go to readme in main branch. 
 
