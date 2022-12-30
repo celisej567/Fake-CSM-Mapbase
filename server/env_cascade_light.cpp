@@ -23,7 +23,7 @@ static ConVar curdist("csm_current_distance", "100000", 0, "Current Z distance. 
 //fov things
 static ConVar defFOV("csm_default_fov", "15", FCVAR_DEVELOPMENTONLY, "Default FOV. Used for some fov calculations. Please dont change");
 static ConVar curFOV("csm_current_fov", "15", 0, "Current FOV. You can change it");
-static ConVar csm_second_fov("csm_second_fov", "350", FCVAR_NONE, "FOV of the second csm.");
+static ConVar csm_second_fov("csm_second_fov", "360", FCVAR_NONE, "FOV of the second csm.");
 static ConVar csm_third_fov("csm_third_fov", "2800", FCVAR_NONE, "FOV of the second csm.");
 
 //farz and nearz
@@ -219,28 +219,9 @@ void UTIL_ColorStringToLinearFloatColorCSMFakeThird(Vector& color, const char* p
 
 bool CEnvCascadeLightThird::KeyValue(const char* szKeyName, const char* szValue)
 {
-	if (FStrEq(szKeyName, "lightcolor"))
-	{
-		float tmp[4];
-		UTIL_StringToFloatArray(tmp, 4, szValue);
-		/*
-		if (tmp[3] <= 0.0f)
-		{
-			tmp[3] = 255.0f;
-		}
-		tmp[3] *= (1.0f / 255.0f);
-		*/
-		m_LightColor.SetR(GammaToLinear(tmp[0]));
-		m_LightColor.SetG(GammaToLinear(tmp[1]));
-		m_LightColor.SetB(GammaToLinear(tmp[2]));
-		m_LightColor.SetA(GammaToLinear(tmp[3]));
-	}
-	else
-	{
-		return BaseClass::KeyValue(szKeyName, szValue);
-	}
 
-	return true;
+	return BaseClass::KeyValue(szKeyName, szValue);
+
 }
 
 void CEnvCascadeLightThird::Activate(void)
@@ -392,28 +373,9 @@ void UTIL_ColorStringToLinearFloatColorCSMFakeSecond(Vector& color, const char* 
 
 bool CEnvCascadeLightSecond::KeyValue(const char* szKeyName, const char* szValue)
 {
-	if (FStrEq(szKeyName, "lightcolor"))
-	{
-		float tmp[4];
-		UTIL_StringToFloatArray(tmp, 4, szValue);
-		/*
-		if (tmp[3] <= 0.0f)
-		{
-			tmp[3] = 255.0f;
-		}
-		tmp[3] *= (1.0f / 255.0f);
-		*/
-		m_LightColor.SetR(GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3]);
-		m_LightColor.SetG(GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3]);
-		m_LightColor.SetB(GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3]);
-		m_LightColor.SetA(tmp[3]);
-	}
-	else
-	{
-		return BaseClass::KeyValue(szKeyName, szValue);
-	}
 
-	return true;
+	return BaseClass::KeyValue(szKeyName, szValue);
+
 }
 
 void CEnvCascadeLightSecond::Activate(void)
@@ -600,13 +562,14 @@ void CEnvCascadeLight::Preparation()
 
 	CSMOrigin = gEntList.FindEntityByClassname(CSMOrigin, "csm_origin");
 	CSMSecond = gEntList.FindEntityByClassname(CSMSecond, "csm_second");
+
 	//if origin is exist
 	if (CSMOrigin)
 	{
 
 		csm_origin = dynamic_cast<CLightOrigin*>(CSMOrigin);
-		//if second csm is exist
 
+		//if second csm is exist
 		if (CSMSecond)
 		{
 			SecondCSM = dynamic_cast<CEnvCascadeLightSecond*>(CSMSecond);
@@ -622,19 +585,21 @@ void CEnvCascadeLight::Preparation()
 			DispatchSpawn(SecondCSM);
 		}
 
+		//if third csm enabled
 		if (m_bEnableThird)
 		{
 			CreateEntityByName("csm_third");
 			CBaseEntity* CSMThird = NULL;
 
 			CSMThird = gEntList.FindEntityByClassname(CSMThird, "csm_third");
+
+			//if third csm exist
 			if (CSMThird)
 			{
 				ThirdCSM = dynamic_cast<CEnvCascadeLightThird*>(CSMThird);
 				ThirdCSM->SetAbsAngles(GetAbsAngles());
 				ThirdCSM->SetAbsOrigin(GetAbsOrigin());
 				ThirdCSM->SetParent(GetBaseEntity());
-				//ThirdCSM->m_LinearFloatLightColor = m_LinearFloatLightColor * ConVarRef("csm_second_intensity").GetFloat();
 
 				ThirdCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_third_intensity").GetFloat());
 				ThirdCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_third_intensity").GetFloat());
@@ -659,7 +624,6 @@ void CEnvCascadeLight::Preparation()
 		else
 		{
 			csm_origin->SetAbsAngles(QAngle((GetLocalAngles().x - 90), GetLocalAngles().y, -GetLocalAngles().z));
-			//Msg("pEnv local angle = %f %f %f \n", pEnv->GetLocalAngles().x, pEnv->GetLocalAngles().y, pEnv->GetLocalAngles().z);
 			SetLocalAngles(QAngle(90, 0, 0));
 			DevMsg("CSM using light_environment \n");
 		}
@@ -690,11 +654,11 @@ void UTIL_ColorStringToLinearFloatColorCSMFake(Vector& color, const char* pStrin
 {
 	float tmp[4];
 	UTIL_StringToFloatArray(tmp, 4, pString);
-	if (tmp[3] <= 0.0f)
+	if (tmp[4] <= 0.0f)
 	{
-		tmp[3] = 255.0f;
+		tmp[4] = 255.0f;
 	}
-	tmp[3] *= (1.0f / 255.0f);
+	tmp[4] *= (1.0f / 255.0f);
 	color.x = GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3];
 	color.y = GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3];
 	color.z = GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3];
@@ -707,13 +671,6 @@ bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 	{
 		float tmp[4];
 		UTIL_StringToFloatArray(tmp, 4, szValue);
-		/*
-		if (tmp[3] <= 0.0f)
-		{
-			tmp[3] = 255.0f;
-		}
-		tmp[3] *= (1.0f / 255.0f);
-		*/
 		m_LightColor.SetR(tmp[0]);
 		m_LightColor.SetG(tmp[1]);
 		m_LightColor.SetB(tmp[2]);
@@ -774,6 +731,26 @@ void CEnvCascadeLight::InitialThink(void)
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	curFOV.SetValue(defFOV.GetFloat() * bibigon);
 	m_flLightFOV = curFOV.GetFloat();
+
+	if (SecondCSM) 
+	{
+		SecondCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_second_intensity").GetFloat());
+		SecondCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_second_intensity").GetFloat());
+		SecondCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_second_intensity").GetFloat());
+		SecondCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_second_intensity").GetFloat());
+	}
+
+	if (m_bEnableThird)
+	{
+		if (ThirdCSM)
+		{
+			ThirdCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_third_intensity").GetFloat());
+			ThirdCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_third_intensity").GetFloat());
+			ThirdCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_third_intensity").GetFloat());
+			ThirdCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_third_intensity").GetFloat());
+		}
+	}
+
 }
 
 
