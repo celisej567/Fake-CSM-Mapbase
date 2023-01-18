@@ -13,6 +13,10 @@ Thanks:
 
 -Changes intensity because mapbase updates.
 
+-Fixed Angle problems.
+
+-You dont need to copy Pitch to Angles in light_env
+
 -Added light_env changes to csm.fgd.
 
 `ALSO NOW YOU SHOULD COPY PITCH PARAMETERS EXECLY HOW IT SHOULD BE (PITCH YAW ROLL)`
