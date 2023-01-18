@@ -543,9 +543,6 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	state.m_fQuadraticAtten = 0.0;
 	state.m_fLinearAtten = 100;
 	state.m_fConstantAtten = 0.0f;
-	//state.m_Color[0] = m_LinearFloatLightColor.x;
-	//state.m_Color[1] = m_LinearFloatLightColor.y;
-	//state.m_Color[2] = m_LinearFloatLightColor.z;
 
 #ifdef MAPBASE
 	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
@@ -561,8 +558,8 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 	state.m_Color[3] = 0.0f; // fixme: need to make ambient work m_flAmbient;
 	state.m_NearZ = m_flNearZ;
 	state.m_FarZ = m_flFarZ;
-	state.m_flShadowSlopeScaleDepthBias = ConVarRef("mat_slopescaledepthbias_shadowmap").GetFloat();//csm_slopescaledepthbias_shadowmap.GetFloat();
-	state.m_flShadowDepthBias = ConVarRef("mat_depthbias_shadowmap").GetFloat();//csm_depthbias_shadowmap.GetFloat();
+	state.m_flShadowSlopeScaleDepthBias = ConVarRef("mat_slopescaledepthbias_shadowmap").GetFloat();
+	state.m_flShadowDepthBias = ConVarRef("mat_depthbias_shadowmap").GetFloat();
 	state.m_bEnableShadows = m_bEnableShadows;
 	state.m_pSpotlightTexture = materials->FindTexture(m_SpotlightTextureName, TEXTURE_GROUP_OTHER, false);
 	state.m_nSpotlightTextureFrame = m_nSpotlightTextureFrame;

@@ -78,16 +78,14 @@ void CLightOrigin::Spawn()
 		if (pEntity)
 		{
 			CEnvLight* pEnv = dynamic_cast<CEnvLight*>(pEntity);
-
-			QAngle bb = pEnv->GetAbsAngles();
-			SetAbsAngles(bb);
 			
-			ConColorMsg(Color(0,230,0), "light_environment Founded!\n");
+			SetAbsAngles(QAngle(-90 - pEnv->m_iPitch, pEnv->GetAbsAngles().y, pEnv->GetAbsAngles().z));
+			DevMsg("[FAKE CSM]		light_environment Founded!\n");
 		}
 		else
 		{
 			//Msg("What the fuck? Map dont have light_environment with targetname!");
-			ConColorMsg(Color(230, 0, 0), "What the fuck? Map dont have light_environment with targetname!\n");
+			DevMsg("[FAKE CSM]		Cant find light_environment with targetname!\n");
 		}
 	}
 }
@@ -449,7 +447,7 @@ private:
 	CEnvCascadeLightThird* ThirdCSM;
 	CNetworkVar(bool, m_bState);
 	CNetworkVar(float, m_flLightFOV);
-	CNetworkVar(bool, EnableAngleFromEnv);
+	CNetworkVar(bool, m_bEnableAngleFromEnv);
 	CNetworkVar(bool, m_bEnableShadows);
 	CNetworkVar(bool, m_bLightOnlyTarget);
 	CNetworkVar(bool, m_bLightWorld);
@@ -485,7 +483,7 @@ DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
 DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
 DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
-DEFINE_KEYFIELD(EnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
+DEFINE_KEYFIELD(m_bEnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
 
 
 //Inputs
@@ -538,7 +536,7 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 	m_bLightOnlyTarget = false;
 	m_bLightWorld = true;
 	m_bCameraSpace = false;
-	EnableAngleFromEnv = false;
+	m_bEnableAngleFromEnv = false;
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
 	m_nSpotlightTextureFrame = 0;
@@ -615,20 +613,13 @@ void CEnvCascadeLight::Preparation()
 
 		SetAbsOrigin(Vector(csm_origin->GetAbsOrigin().x, csm_origin->GetAbsOrigin().y, csm_origin->GetAbsOrigin().z + curdist.GetInt()));
 
-		if (EnableAngleFromEnv)
-		{
+		if (m_bEnableAngleFromEnv)
 			csm_origin->angFEnv = true;
-			SetLocalAngles(QAngle(90, 0, 0));
-
-		}
 		else
-		{
 			csm_origin->SetAbsAngles(QAngle((GetLocalAngles().x - 90), GetLocalAngles().y, -GetLocalAngles().z));
-			SetLocalAngles(QAngle(90, 0, 0));
-			DevMsg("CSM using light_environment \n");
-		}
 
 
+		SetLocalAngles(QAngle(90, 0, 0));
 
 		DefaultAngle = csm_origin->GetAbsAngles();
 		CurrentAngle = DefaultAngle;
@@ -638,7 +629,7 @@ void CEnvCascadeLight::Preparation()
 	}
 	else
 	{
-		Msg("Main csm entity can't find \"csmorigin\" entity!");
+		DevMsg("[FAKE CSM]		Main csm entity can't find \"csmorigin\" entity!");
 	}
 
 }
@@ -654,11 +645,11 @@ void UTIL_ColorStringToLinearFloatColorCSMFake(Vector& color, const char* pStrin
 {
 	float tmp[4];
 	UTIL_StringToFloatArray(tmp, 4, pString);
-	if (tmp[4] <= 0.0f)
-	{
-		tmp[4] = 255.0f;
+	if (tmp[3] <= 0.0f)
+	{	
+		tmp[3] = 255.0f;
 	}
-	tmp[4] *= (1.0f / 255.0f);
+	tmp[3] *= (1.0f / 255.0f);
 	color.x = GammaToLinear(tmp[0] * (1.0f / 255.0f)) * tmp[3];
 	color.y = GammaToLinear(tmp[1] * (1.0f / 255.0f)) * tmp[3];
 	color.z = GammaToLinear(tmp[2] * (1.0f / 255.0f)) * tmp[3];
@@ -669,6 +660,7 @@ bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 
 	if (FStrEq(szKeyName, "lightcolor") || FStrEq(szKeyName, "color"))
 	{
+		
 		float tmp[4];
 		UTIL_StringToFloatArray(tmp, 4, szValue);
 		m_LightColor.SetR(tmp[0]);
