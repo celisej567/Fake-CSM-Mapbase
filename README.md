@@ -15,7 +15,7 @@ Thanks:
 
 -Fixed Angle problems.
 
--You dont need to copy Pitch to Angles in light_env
+-You dont need to copy Pitch to Angles in light_env.
 
 -Added light_env changes to csm.fgd.
 
