@@ -29,7 +29,6 @@ If you have problens like "All CSM are overbright", try to use this(https://www.
 
 And pls add me somewhere in credits or just say about me in the description.
 
-`mat_depthbias_shadowmap should be 0.00001` and `mat_slopescaledepthbias_shadowmap should be 4`      
 This CSM looks better when `r_flashlightdepthres is 4096` 
 
 # How to install
