@@ -24,6 +24,7 @@ static ConVar scissor("r_flashlightscissor", "0");
 ConVar csm_intensity("csm_intensity", "200");
 ConVar csm_second_intensity("csm_second_intensity", "200");
 ConVar csm_third_intensity("csm_third_intensity", "200");
+ConVar csm_brightness_general("csm_brightness_general", "1");
 
 
 ConVar csm_filter("csm_filter", "1");
@@ -282,9 +283,9 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 #ifdef MAPBASE
 	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
-	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
-	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
-	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat();
+	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_intensity.GetFloat() * csm_brightness_general.GetFloat();
 #else
 	state.m_Color[0] = m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * csm_intensity.GetFloat();
 	state.m_Color[1] = m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * csm_intensity.GetFloat();
@@ -333,6 +334,7 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 
 void C_EnvCascadeLight::Simulate( void )
 {
+	
 	m_bState = csm_enable.GetBool();
 	UpdateLight(true);
 	BaseClass::Simulate();
@@ -445,10 +447,10 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 		
 		if(m_LightHandle!=CLIENTSHADOW_INVALID_HANDLE)
 		ShutDownLightHandle();
-		
-		
 		return;
 	}
+
+
 
 	Vector vForward, vRight, vUp, vPos = GetAbsOrigin();
 	FlashlightState_t state;
@@ -546,9 +548,9 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 
 #ifdef MAPBASE
 	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
-	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat();
-	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat();
-	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat();
+	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_second_intensity.GetFloat() * csm_brightness_general.GetFloat();
 #else
 	state.m_Color[0] = m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * csm_second_intensity.GetFloat();
 	state.m_Color[1] = m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * csm_second_intensity.GetFloat();
@@ -706,11 +708,8 @@ void C_EnvCascadeLightThird::UpdateLight(bool bForceUpdate)
 
 	if (m_bState == false)
 	{
-
 		if (m_LightHandle != CLIENTSHADOW_INVALID_HANDLE)
 			ShutDownLightHandle();
-
-
 		return;
 	}
 
@@ -814,9 +813,9 @@ void C_EnvCascadeLightThird::UpdateLight(bool bForceUpdate)
 
 #ifdef MAPBASE
 	float flAlpha = m_flCurrentLinearFloatLightAlpha * (1.0f / 255.0f);
-	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat();
-	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat();
-	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat();
+	state.m_Color[0] = (m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[1] = (m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat() * csm_brightness_general.GetFloat();
+	state.m_Color[2] = (m_CurrentLinearFloatLightColor.z * (1.0f / 255.0f) * flAlpha) * csm_third_intensity.GetFloat() * csm_brightness_general.GetFloat();
 #else
 	state.m_Color[0] = m_CurrentLinearFloatLightColor.x * (1.0f / 255.0f) * csm_third_intensity.GetFloat();
 	state.m_Color[1] = m_CurrentLinearFloatLightColor.y * (1.0f / 255.0f) * csm_third_intensity.GetFloat();

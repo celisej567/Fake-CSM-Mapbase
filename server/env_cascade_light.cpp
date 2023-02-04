@@ -18,19 +18,18 @@
 
 //distance
 static ConVar defdist("csm_default_distance", "1000", FCVAR_DEVELOPMENTONLY, "Default Z distance. Used for some fov calculations. Please dont change");
-static ConVar curdist("csm_current_distance", "100000", 0, "Current Z distance. You can change it.");
+ConVar curdist("csm_current_distance", "100000", 0, "Current Z distance. You can change it.");
 
 //fov things
 static ConVar defFOV("csm_default_fov", "15", FCVAR_DEVELOPMENTONLY, "Default FOV. Used for some fov calculations. Please dont change");
-static ConVar curFOV("csm_current_fov", "15", 0, "Current FOV. You can change it");
-static ConVar csm_second_fov("csm_second_fov", "360", FCVAR_NONE, "FOV of the second csm.");
-static ConVar csm_third_fov("csm_third_fov", "2800", FCVAR_NONE, "FOV of the second csm.");
+ConVar curFOV("csm_current_fov", "15", 0, "Current FOV. You can change it");
+ConVar csm_second_fov("csm_second_fov", "360", FCVAR_NONE, "FOV of the second csm.");
+ConVar csm_third_fov("csm_third_fov", "2800", FCVAR_NONE, "FOV of the second csm.");
 
 //farz and nearz
 ConVar csm_nearz("csm_nearz", "90000");
 ConVar csm_farz("csm_farz", "200000");
 
-ConVar csm_enable("csm_enable", "1");
 
 
 
@@ -185,7 +184,7 @@ CEnvCascadeLightThird::CEnvCascadeLightThird(void)
 #else
 	m_LightColor.Init(255, 255, 255, 1);
 #endif
-	m_bState = csm_enable.GetBool();
+	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
 	m_bLightOnlyTarget = false;
@@ -237,7 +236,6 @@ void CEnvCascadeLightThird::Activate(void)
 
 void CEnvCascadeLightThird::InitialThink(void)
 {
-	m_bState = csm_enable.GetBool();
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	m_flLightFOV = csm_third_fov.GetFloat() * bibigon;
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
@@ -339,7 +337,7 @@ CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
 #else
 	m_LightColor.Init(255, 255, 255, 1);
 #endif
-	m_bState = csm_enable.GetBool();
+	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
 	m_bLightOnlyTarget = false;
@@ -391,7 +389,6 @@ void CEnvCascadeLightSecond::Activate(void)
 
 void CEnvCascadeLightSecond::InitialThink(void)
 {
-	m_bState = csm_enable.GetBool();
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	m_flLightFOV = csm_second_fov.GetFloat() * bibigon;
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
@@ -424,8 +421,6 @@ public:
 	void Preparation();
 
 	//Inputs
-	void InputTurnOn(inputdata_t& inputdata);
-	void InputTurnOff(inputdata_t& inputdata);
 	void InputSetEnableShadows(inputdata_t& inputdata);
 	void InputSetLightColor( inputdata_t &inputdata );
 	void InputSetSpotlightTexture(inputdata_t& inputdata);
@@ -459,6 +454,7 @@ private:
 	CNetworkVar(float, m_flNearZ);
 	CNetworkVar(float, m_flFarZ);
 	CNetworkVar(int, m_nShadowQuality);
+	float m_flBrightnessScale;
 
 	bool m_bEnableThird;
 
@@ -484,11 +480,10 @@ DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
 DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_KEYFIELD(m_bEnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
+DEFINE_KEYFIELD(m_flBrightnessScale, FIELD_FLOAT, "brightnessscale"),
 
 
 //Inputs
-DEFINE_INPUTFUNC(FIELD_VOID, "Enable", InputTurnOn),
-DEFINE_INPUTFUNC(FIELD_VOID, "Disable", InputTurnOff),
 DEFINE_INPUTFUNC(FIELD_BOOLEAN, "EnableShadows", InputSetEnableShadows),
 DEFINE_INPUTFUNC(FIELD_COLOR32, "LightColor", InputSetLightColor),
 DEFINE_INPUTFUNC(FIELD_FLOAT, "Ambient", InputSetAmbient),
@@ -530,13 +525,14 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 #else
 	m_LightColor.Init(255, 255, 255, 1);
 #endif
-	m_bState = csm_enable.GetBool();
+	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
 	m_bLightOnlyTarget = false;
 	m_bLightWorld = true;
 	m_bCameraSpace = false;
 	m_bEnableAngleFromEnv = false;
+	m_flBrightnessScale = 1.0f;
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
 	m_nSpotlightTextureFrame = 0;
@@ -632,6 +628,8 @@ void CEnvCascadeLight::Preparation()
 		DevMsg("[FAKE CSM]		Main csm entity can't find \"csmorigin\" entity!");
 	}
 
+	ConVarRef("csm_brightness_general").SetValue(m_flBrightnessScale);
+
 }
 
 void CEnvCascadeLight::Spawn()
@@ -677,16 +675,6 @@ bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 	return true;
 }
 
-void CEnvCascadeLight::InputTurnOn(inputdata_t& inputdata)
-{
-	m_bState = true;
-}
-
-void CEnvCascadeLight::InputTurnOff(inputdata_t& inputdata)
-{
-	m_bState = false;
-}
-
 
 void CEnvCascadeLight::InputSetEnableShadows(inputdata_t& inputdata)
 {
@@ -706,10 +694,10 @@ void CEnvCascadeLight::InputSetSpotlightTexture(inputdata_t& inputdata)
 
 void CEnvCascadeLight::Activate(void)
 {
-	if (GetSpawnFlags() & ENV_CASCADE_STARTON)
+	/*if (GetSpawnFlags() & ENV_CASCADE_STARTON)
 	{
 		m_bState = true;
-	}
+	}*/
 	SetThink(&CEnvCascadeLight::InitialThink);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
@@ -718,7 +706,6 @@ void CEnvCascadeLight::Activate(void)
 
 void CEnvCascadeLight::InitialThink(void)
 {
-	m_bState = csm_enable.GetBool();
 	m_hTargetEntity = gEntList.FindEntityByName(NULL, m_target);
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	curFOV.SetValue(defFOV.GetFloat() * bibigon);

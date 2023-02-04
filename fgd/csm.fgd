@@ -9,6 +9,7 @@
 		1  : "Enabled"				: 1
 	]
 	lightcolor(color255)		: "Light Color" : "255 255 255 200" : "Light Color RGB-Intensity"
+	brightnessscale(float)		: "Brightness Scale" : "1" : "ConVar csm_brightness_general = this parameter. You change this parameter - game changes csm_brightness_general to this value. Want to change brightness using inputs - use point_servercommand and change csm_brightness_general itself." 
 	cameraspace(integer)		: "Camera Space" : 0 : "Angles are interpreted as being relative to camera."
 	
 	uselightenvangles(Choices) : "Use light_environment's angles" : 1 : "If true, the CSM shadow angles are automatically harvested from the light_environment's angles. If false, this entity's angles are used." = 
@@ -24,7 +25,7 @@
 	]
 	
 	
-	ambient(integer)	:"Ambient" : 0 : "idk"
+	ambient(integer)	:"Ambient" : 0 : "[DOESNT WORK] Ambient of the light. I know how to make it work, but i will do it later."
 	
 	input Enable(void)		: "Turn on the texture"
 	input Disable(void)		: "Turn off the texture"
