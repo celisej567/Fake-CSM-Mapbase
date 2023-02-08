@@ -21,10 +21,15 @@ Thanks:
 
 -Added light_env changes to csm.fgd.
 
+-Fixed color problems.
+
+-Added Brightness.
+
+-Added Name for light_env.
+
 
 If you have `Assert server/baseentity.cpp in 7240 line` you should go to this file and comment it. Also comment Warning up there.         
 If you have problems with blend materials, try to make it displacement.        
-If you have problems like "Second CSM Level are white but the First CSM Level are different color" try to set blue channel to 0
 If you have problens like "All CSM are overbright", try to use this(https://www.moddb.com/mods/mapbase/downloads/mapbase-multi-tool) to convert shaders to SDK_ shader from mapbase
 
 And pls add me somewhere in credits or just say about me in the description.
