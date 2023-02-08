@@ -115,8 +115,6 @@ public:
 	void InitialThink(void);
 
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
-	CNetworkVector(m_LinearFloatLightColor);
-	CNetworkColor32(m_LightColor);
 	CNetworkVar(float, m_flNearZ);
 	CNetworkVar(float, m_flFarZ);
 
@@ -152,12 +150,10 @@ DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
 DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
 DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
-DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLightThird, DT_EnvCascadeLightThird)
-SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt),
 SendPropEHandle(SENDINFO(m_hTargetEntity)),
 SendPropBool(SENDINFO(m_bState)),
 SendPropFloat(SENDINFO(m_flLightFOV)),
@@ -165,7 +161,6 @@ SendPropBool(SENDINFO(m_bEnableShadows)),
 SendPropBool(SENDINFO(m_bLightOnlyTarget)),
 SendPropBool(SENDINFO(m_bLightWorld)),
 SendPropBool(SENDINFO(m_bCameraSpace)),
-SendPropVector(SENDINFO(m_LinearFloatLightColor)),
 SendPropFloat(SENDINFO(m_flAmbient)),
 SendPropString(SENDINFO(m_SpotlightTextureName)),
 SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
@@ -179,11 +174,6 @@ END_SEND_TABLE()
 //-----------------------------------------------------------------------------
 CEnvCascadeLightThird::CEnvCascadeLightThird(void)
 {
-#ifdef MAPBASE
-	m_LightColor.Init(255, 255, 255, 255);
-#else
-	m_LightColor.Init(255, 255, 255, 1);
-#endif
 	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
@@ -193,7 +183,6 @@ CEnvCascadeLightThird::CEnvCascadeLightThird(void)
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_ring");
 	m_nSpotlightTextureFrame = 0;
-	m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
 	m_flAmbient = 0.0f;
 	m_flNearZ = csm_nearz.GetFloat();
 	m_flFarZ = csm_farz.GetFloat();
@@ -268,8 +257,6 @@ public:
 	void InitialThink(void);
 
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
-	CNetworkVector(m_LinearFloatLightColor);
-	CNetworkColor32(m_LightColor);
 	CNetworkVar(float, m_flNearZ);
 	CNetworkVar(float, m_flFarZ);
 
@@ -305,12 +292,10 @@ DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
 DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
 DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
-DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_THINKFUNC(InitialThink),
 END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLightSecond, DT_EnvCascadeLightSecond)
-SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt),
 SendPropEHandle(SENDINFO(m_hTargetEntity)),
 SendPropBool(SENDINFO(m_bState)),
 SendPropFloat(SENDINFO(m_flLightFOV)),
@@ -318,7 +303,6 @@ SendPropBool(SENDINFO(m_bEnableShadows)),
 SendPropBool(SENDINFO(m_bLightOnlyTarget)),
 SendPropBool(SENDINFO(m_bLightWorld)),
 SendPropBool(SENDINFO(m_bCameraSpace)),
-SendPropVector(SENDINFO(m_LinearFloatLightColor)),
 SendPropFloat(SENDINFO(m_flAmbient)),
 SendPropString(SENDINFO(m_SpotlightTextureName)),
 SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
@@ -332,11 +316,6 @@ END_SEND_TABLE()
 //-----------------------------------------------------------------------------
 CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
 {
-#ifdef MAPBASE
-	m_LightColor.Init(255, 255, 255, 255);
-#else
-	m_LightColor.Init(255, 255, 255, 1);
-#endif
 	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
@@ -346,7 +325,6 @@ CEnvCascadeLightSecond::CEnvCascadeLightSecond(void)
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_ring");
 	m_nSpotlightTextureFrame = 0;
-	m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
 	m_flAmbient = 0.0f;
 	m_flNearZ = csm_nearz.GetFloat();
 	m_flFarZ = csm_farz.GetFloat();
@@ -436,7 +414,6 @@ public:
 	CNetworkHandle(CBaseEntity, m_hTargetEntity);
 
 private:
-	CNetworkColor32(m_LightColor);
 	CLightOrigin* csm_origin;
 	CEnvCascadeLightSecond* SecondCSM;
 	CEnvCascadeLightThird* ThirdCSM;
@@ -447,7 +424,6 @@ private:
 	CNetworkVar(bool, m_bLightOnlyTarget);
 	CNetworkVar(bool, m_bLightWorld);
 	CNetworkVar(bool, m_bCameraSpace);
-	CNetworkVector(m_LinearFloatLightColor);
 	CNetworkVar(float, m_flAmbient);
 	CNetworkString(m_SpotlightTextureName, MAX_PATH);
 	CNetworkVar(int, m_nSpotlightTextureFrame);
@@ -478,7 +454,6 @@ DEFINE_KEYFIELD(m_nSpotlightTextureFrame, FIELD_INTEGER, "textureframe"),
 DEFINE_KEYFIELD(m_flNearZ, FIELD_FLOAT, "nearz"),
 DEFINE_KEYFIELD(m_flFarZ, FIELD_FLOAT, "farz"),
 DEFINE_KEYFIELD(m_nShadowQuality, FIELD_INTEGER, "shadowquality"),
-DEFINE_FIELD(m_LinearFloatLightColor, FIELD_VECTOR),
 DEFINE_KEYFIELD(m_bEnableAngleFromEnv, FIELD_BOOLEAN, "uselightenvangles"),
 DEFINE_KEYFIELD(m_flBrightnessScale, FIELD_FLOAT, "brightnessscale"),
 
@@ -497,8 +472,6 @@ END_DATADESC()
 
 IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLight, DT_EnvCascadeLight)
 
-	SendPropInt(SENDINFO(m_LightColor), 32, SPROP_UNSIGNED, SendProxy_Color32ToInt),
-
 	SendPropEHandle(SENDINFO(m_hTargetEntity)),
 	SendPropBool(SENDINFO(m_bState)),
 	SendPropFloat(SENDINFO(m_flLightFOV)),
@@ -506,7 +479,6 @@ IMPLEMENT_SERVERCLASS_ST(CEnvCascadeLight, DT_EnvCascadeLight)
 	SendPropBool(SENDINFO(m_bLightOnlyTarget)),
 	SendPropBool(SENDINFO(m_bLightWorld)),
 	SendPropBool(SENDINFO(m_bCameraSpace)),
-	SendPropVector(SENDINFO(m_LinearFloatLightColor)),
 	SendPropFloat(SENDINFO(m_flAmbient)),
 	SendPropString(SENDINFO(m_SpotlightTextureName)),
 	SendPropInt(SENDINFO(m_nSpotlightTextureFrame)),
@@ -520,11 +492,6 @@ END_SEND_TABLE()
 //-----------------------------------------------------------------------------
 CEnvCascadeLight::CEnvCascadeLight(void)
 {
-#ifdef MAPBASE
-	m_LightColor.Init(255, 255, 255, 255);
-#else
-	m_LightColor.Init(255, 255, 255, 1);
-#endif
 	m_bState = true;
 	m_flLightFOV = 45.0f;
 	m_bEnableShadows = true;
@@ -536,7 +503,6 @@ CEnvCascadeLight::CEnvCascadeLight(void)
 
 	Q_strcpy(m_SpotlightTextureName.GetForModify(), "tools\\fakecsm\\mask_center");
 	m_nSpotlightTextureFrame = 0;
-	m_LinearFloatLightColor.Init(1.0f, 1.0f, 1.0f);
 	m_flAmbient = 0.0f;
 	m_flNearZ = csm_nearz.GetFloat();
 	m_flFarZ = csm_farz.GetFloat();
@@ -571,11 +537,6 @@ void CEnvCascadeLight::Preparation()
 			SecondCSM->SetAbsOrigin(GetAbsOrigin());
 			SecondCSM->SetParent(GetBaseEntity());
 
-			SecondCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_second_intensity").GetFloat());
-			SecondCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_second_intensity").GetFloat());
-			SecondCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_second_intensity").GetFloat());
-			SecondCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_second_intensity").GetFloat());
-
 			DispatchSpawn(SecondCSM);
 		}
 
@@ -594,11 +555,6 @@ void CEnvCascadeLight::Preparation()
 				ThirdCSM->SetAbsAngles(GetAbsAngles());
 				ThirdCSM->SetAbsOrigin(GetAbsOrigin());
 				ThirdCSM->SetParent(GetBaseEntity());
-
-				ThirdCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_third_intensity").GetFloat());
-				ThirdCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_third_intensity").GetFloat());
-				ThirdCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_third_intensity").GetFloat());
-				ThirdCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_third_intensity").GetFloat());
 
 				DispatchSpawn(ThirdCSM);
 			}
@@ -661,10 +617,11 @@ bool CEnvCascadeLight::KeyValue(const char* szKeyName, const char* szValue)
 		
 		float tmp[4];
 		UTIL_StringToFloatArray(tmp, 4, szValue);
-		m_LightColor.SetR(tmp[0]);
-		m_LightColor.SetG(tmp[1]);
-		m_LightColor.SetB(tmp[2]);
-		m_LightColor.SetA(tmp[3]);
+
+		ConVarRef("csm_color_r").SetValue(tmp[0]);
+		ConVarRef("csm_color_g").SetValue(tmp[1]);
+		ConVarRef("csm_color_b").SetValue(tmp[2]);
+		ConVarRef("csm_color_a").SetValue(tmp[3]);
 
 	}
 	else
@@ -694,10 +651,6 @@ void CEnvCascadeLight::InputSetSpotlightTexture(inputdata_t& inputdata)
 
 void CEnvCascadeLight::Activate(void)
 {
-	/*if (GetSpawnFlags() & ENV_CASCADE_STARTON)
-	{
-		m_bState = true;
-	}*/
 	SetThink(&CEnvCascadeLight::InitialThink);
 	SetNextThink(gpGlobals->curtime + 0.1f);
 
@@ -710,26 +663,6 @@ void CEnvCascadeLight::InitialThink(void)
 	float bibigon = defdist.GetFloat() / curdist.GetFloat();
 	curFOV.SetValue(defFOV.GetFloat() * bibigon);
 	m_flLightFOV = curFOV.GetFloat();
-
-	if (SecondCSM) 
-	{
-		SecondCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_second_intensity").GetFloat());
-		SecondCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_second_intensity").GetFloat());
-		SecondCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_second_intensity").GetFloat());
-		SecondCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_second_intensity").GetFloat());
-	}
-
-	if (m_bEnableThird)
-	{
-		if (ThirdCSM)
-		{
-			ThirdCSM->m_LightColor.SetR(GammaToLinear(m_LightColor.GetR()) * ConVarRef("csm_third_intensity").GetFloat());
-			ThirdCSM->m_LightColor.SetG(GammaToLinear(m_LightColor.GetG()) * ConVarRef("csm_third_intensity").GetFloat());
-			ThirdCSM->m_LightColor.SetB(GammaToLinear(m_LightColor.GetB()) * ConVarRef("csm_third_intensity").GetFloat());
-			ThirdCSM->m_LightColor.SetA(GammaToLinear(m_LightColor.GetA()) * ConVarRef("csm_third_intensity").GetFloat());
-		}
-	}
-
 }
 
 
@@ -764,13 +697,13 @@ void CEnvCascadeLight::InputResetAngles(inputdata_t& inputdata)
 
 void CEnvCascadeLight::InputSetLightColor(inputdata_t& inputdata)
 {
-	m_LightColor = inputdata.value.Color32();
-	SecondCSM->m_LightColor = inputdata.value.Color32();
-	
-	if (m_bEnableThird)
-	{
-		ThirdCSM->m_LightColor = inputdata.value.Color32();
-	}
+
+	color32 color = inputdata.value.Color32();
+
+	ConVarRef("csm_color_r").SetValue(color.r);
+	ConVarRef("csm_color_g").SetValue(color.g);
+	ConVarRef("csm_color_b").SetValue(color.b);
+	ConVarRef("csm_color_a").SetValue(color.a);
 }
 
 int CEnvCascadeLight::UpdateTransmitState()

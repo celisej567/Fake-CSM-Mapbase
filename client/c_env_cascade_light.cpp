@@ -25,6 +25,10 @@ ConVar csm_intensity("csm_intensity", "200");
 ConVar csm_second_intensity("csm_second_intensity", "200");
 ConVar csm_third_intensity("csm_third_intensity", "200");
 ConVar csm_brightness_general("csm_brightness_general", "1");
+ConVar csm_color_r("csm_color_r", "255");
+ConVar csm_color_g("csm_color_g", "255");
+ConVar csm_color_b("csm_color_b", "255");
+ConVar csm_color_a("csm_color_a", "255");
 
 
 ConVar csm_filter("csm_filter", "1");
@@ -94,7 +98,7 @@ private:
 	ClientShadowHandle_t m_LightHandle;
 
 	EHANDLE	m_hTargetEntity;
-	color32	m_LightColor;
+	//color32	m_LightColor;
 
 #ifdef MAPBASE
 	float m_flBrightnessScale;
@@ -109,7 +113,7 @@ private:
 	bool	m_bLightOnlyTarget;
 	bool	m_bLightWorld;
 	bool	m_bCameraSpace;
-	Vector	m_LinearFloatLightColor;
+	//Vector	m_LinearFloatLightColor;
 	float	m_flAmbient;
 	float	m_flNearZ;
 	float	m_flFarZ;
@@ -124,10 +128,10 @@ IMPLEMENT_CLIENTCLASS_DT(C_EnvCascadeLight, DT_EnvCascadeLight, CEnvCascadeLight
 	RecvPropFloat(	 RECVINFO( m_flLightFOV )		),
 	RecvPropBool(	 RECVINFO( m_bEnableShadows )	),
 	RecvPropBool(	 RECVINFO( m_bLightOnlyTarget ) ),
-	RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),
+	//RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),
 	RecvPropBool(	 RECVINFO( m_bLightWorld )		),
 	RecvPropBool(	 RECVINFO( m_bCameraSpace )		),
-	RecvPropVector(	 RECVINFO( m_LinearFloatLightColor )		),
+	//RecvPropVector(	 RECVINFO( m_LinearFloatLightColor )		),
 	RecvPropFloat(	 RECVINFO( m_flAmbient )		),
 	RecvPropString(  RECVINFO( m_SpotlightTextureName ) ),
 	RecvPropInt(	 RECVINFO( m_nSpotlightTextureFrame ) ),
@@ -226,10 +230,10 @@ void C_EnvCascadeLight::UpdateLight( bool bForceUpdate )
 	{
 		AngleVectors(GetAbsAngles(), &vForward, &vRight, &vUp);
 	}
+	
 
-
-	Vector vLinearFloatLightColor(m_LightColor.r, m_LightColor.g, m_LightColor.b);
-	float flLinearFloatLightAlpha = m_LightColor.a;
+	Vector vLinearFloatLightColor(csm_color_r.GetInt(), csm_color_g.GetInt(), csm_color_b.GetInt());
+	float flLinearFloatLightAlpha = csm_color_a.GetInt();
 
 #ifdef MAPBASE
 	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
@@ -367,7 +371,7 @@ private:
 
 	ClientShadowHandle_t m_LightHandle;
 
-	color32	m_LightColor;
+	//color32	m_LightColor;
 
 #ifdef MAPBASE
 	float m_flBrightnessScale;
@@ -386,7 +390,7 @@ private:
 	bool	m_bLightOnlyTarget;
 	bool	m_bLightWorld;
 	bool	m_bCameraSpace;
-	Vector	m_LinearFloatLightColor;
+	//Vector	m_LinearFloatLightColor;
 	float	m_flAmbient;
 	float	m_flNearZ;
 	float	m_flFarZ;
@@ -396,7 +400,7 @@ private:
 };
 
 IMPLEMENT_CLIENTCLASS_DT(C_EnvCascadeLightSecond, DT_EnvCascadeLightSecond, CEnvCascadeLightSecond)
-RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),
+//RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),
 RecvPropEHandle(RECVINFO(m_hTargetEntity)),
 RecvPropBool(RECVINFO(m_bState)),
 RecvPropFloat(RECVINFO(m_flLightFOV)),
@@ -404,7 +408,7 @@ RecvPropBool(RECVINFO(m_bEnableShadows)),
 RecvPropBool(RECVINFO(m_bLightOnlyTarget)),
 RecvPropBool(RECVINFO(m_bLightWorld)),
 RecvPropBool(RECVINFO(m_bCameraSpace)),
-RecvPropVector(RECVINFO(m_LinearFloatLightColor)),
+//RecvPropVector(RECVINFO(m_LinearFloatLightColor)),
 RecvPropFloat(RECVINFO(m_flAmbient)),
 RecvPropString(RECVINFO(m_SpotlightTextureName)),
 RecvPropInt(RECVINFO(m_nSpotlightTextureFrame)),
@@ -497,8 +501,8 @@ void C_EnvCascadeLightSecond::UpdateLight(bool bForceUpdate)
 		AngleVectors(GetAbsAngles(), &vForward, &vRight, &vUp);
 	}
 
-	Vector vLinearFloatLightColor(m_LightColor.r, m_LightColor.g, m_LightColor.b);
-	float flLinearFloatLightAlpha = m_LightColor.a;
+	Vector vLinearFloatLightColor(csm_color_r.GetInt(), csm_color_g.GetInt(), csm_color_b.GetInt());
+	float flLinearFloatLightAlpha = csm_color_a.GetInt();
 
 #ifdef MAPBASE
 	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
@@ -631,7 +635,7 @@ private:
 
 	ClientShadowHandle_t m_LightHandle;
 
-	color32	m_LightColor;
+	//color32	m_LightColor;
 
 #ifdef MAPBASE
 	float m_flBrightnessScale;
@@ -650,7 +654,7 @@ private:
 	bool	m_bLightOnlyTarget;
 	bool	m_bLightWorld;
 	bool	m_bCameraSpace;
-	Vector	m_LinearFloatLightColor;
+	//Vector	m_LinearFloatLightColor;
 	float	m_flAmbient;
 	float	m_flNearZ;
 	float	m_flFarZ;
@@ -660,7 +664,7 @@ private:
 };
 
 IMPLEMENT_CLIENTCLASS_DT(C_EnvCascadeLightThird, DT_EnvCascadeLightThird, CEnvCascadeLightThird)
-RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),	
+//RecvPropInt(RECVINFO(m_LightColor), 0, RecvProxy_IntToColor32),	
 RecvPropEHandle(RECVINFO(m_hTargetEntity)),
 RecvPropBool(RECVINFO(m_bState)),
 RecvPropFloat(RECVINFO(m_flLightFOV)),
@@ -668,7 +672,7 @@ RecvPropBool(RECVINFO(m_bEnableShadows)),
 RecvPropBool(RECVINFO(m_bLightOnlyTarget)),
 RecvPropBool(RECVINFO(m_bLightWorld)),
 RecvPropBool(RECVINFO(m_bCameraSpace)),
-RecvPropVector(RECVINFO(m_LinearFloatLightColor)),
+//RecvPropVector(RECVINFO(m_LinearFloatLightColor)),
 RecvPropFloat(RECVINFO(m_flAmbient)),
 RecvPropString(RECVINFO(m_SpotlightTextureName)),
 RecvPropInt(RECVINFO(m_nSpotlightTextureFrame)),
@@ -758,8 +762,8 @@ void C_EnvCascadeLightThird::UpdateLight(bool bForceUpdate)
 		AngleVectors(GetAbsAngles(), &vForward, &vRight, &vUp);
 	}
 
-	Vector vLinearFloatLightColor(m_LightColor.r, m_LightColor.g, m_LightColor.b);
-	float flLinearFloatLightAlpha = m_LightColor.a;
+	Vector vLinearFloatLightColor(csm_color_r.GetInt(), csm_color_g.GetInt(), csm_color_b.GetInt());
+	float flLinearFloatLightAlpha = csm_color_a.GetInt();
 
 #ifdef MAPBASE
 	if (m_CurrentLinearFloatLightColor != vLinearFloatLightColor || m_flCurrentLinearFloatLightAlpha != flLinearFloatLightAlpha)
