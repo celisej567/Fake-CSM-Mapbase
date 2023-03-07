@@ -28,7 +28,7 @@ Right now im trying to make this work (or look) almost like actual CSM, so work 
 - Partial compatibility with CSGO.
 
 # How to add this to your Source 2013 mod?
-Copy client and server foldert to your "source code/game" folder, then find client_base/server_base.vpc files in these folders and add `$Include "csm.vpc"` to the top, open createallprojects.bat (or creategameprojects.bat) and add "-f" to the end of the line. After all this stuff you should launch your bat file.
+Copy client and server folder to your "source code/game" folder, then find client_base/server_base.vpc files in these folders and add `$Include "csm.vpc"` to the top, open createallprojects.bat (or creategameprojects.bat) and add "-f" to the end of the line. After all this stuff you should launch your bat file.
 
 if you can't compile the code then make sure you have lights.h in your project and it has this code:
 
