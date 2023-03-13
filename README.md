@@ -44,5 +44,10 @@ This CSM looks better when `r_flashlightdepthres is 4096` and `mat_slopescaledep
 # How to install
 Go to readme in main branch. 
 
+# How to use
+This branch contains some differences from main branch:
+* Instead of copy-paste angles from ligth_env you just should set a name for light_env (csm dont care what exacly name will be). 
+* You should copy color from light_env to CSM color. After this you should change brightness of the light_env (its fourth number in color) to some low value, like 50 or 20.
+
 # If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
