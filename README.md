@@ -1,7 +1,8 @@
 # Fake-CSM-Source-2013 Dev mapbase 7.1 branch
 Here's an example from a mod I'm currently working on. First Image is lighting using default light_environment, second are my csm.
 ![image](https://user-images.githubusercontent.com/75926135/224785385-f9101157-030a-471c-8a79-84ba1228c833.png)
-![image](https://user-images.githubusercontent.com/75926135/224785413-b9d7660d-7ffc-402d-a4e9-1d221603078c.png)
+![image](https://user-images.githubusercontent.com/75926135/224788092-1328088d-93b5-47e9-ba48-d0ce7f930776.png)
+
 
 
 This branch contains some changes only for mapbase 7.1 and some test shit.
