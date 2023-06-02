@@ -43,7 +43,7 @@ And pls add me somewhere in credits or just say about me in the description.
 This CSM looks better when `r_flashlightdepthres is 4096` and `mat_slopescaledepthbias_shadowmap is 4`.
 
 # How to install
-Go to readme in main branch. 
+Go to https://github.com/celisej567/Fake-CSM-Source-2013/wiki
 
 # How to use
 This branch contains some differences from main branch:
