@@ -30,6 +30,7 @@ ConVar csm_color_g("csm_color_g", "255");
 ConVar csm_color_b("csm_color_b", "255");
 ConVar csm_color_a("csm_color_a", "255");
 
+ConVar csm_round_pos("csm_round_pos", "1");
 
 ConVar csm_filter("csm_filter", "1");
 ConVar csm_enable("csm_enable", "1");
@@ -60,7 +61,13 @@ END_RECV_TABLE()
 
 void C_LightOrigin::Update()
 {
-	SetAbsOrigin(C_BasePlayer::GetLocalPlayer()->GetAbsOrigin());
+	Vector pos = C_BasePlayer::GetLocalPlayer()->GetAbsOrigin();
+
+	pos.x = ((int)(pos.x / csm_round_pos.GetInt())) * csm_round_pos.GetInt();
+	pos.y = ((int)(pos.y / csm_round_pos.GetInt())) * csm_round_pos.GetInt();
+	pos.z = ((int)(pos.z / csm_round_pos.GetInt())) * csm_round_pos.GetInt();
+
+	SetAbsOrigin(pos);
 }
 
 
