@@ -35,8 +35,9 @@ Thanks:
 
 
 If you have `Assert server/baseentity.cpp in 7240 line` you should go to this file and comment it. Also comment Warning up there.         
-If you have problems with blend materials, try to make it displacement.        
+      
 If you have problens like "All CSM are overbright", try to use this(https://www.moddb.com/mods/mapbase/downloads/mapbase-multi-tool) to convert shaders to SDK_ shader from mapbase
+If you is you still have same problems, try to make it displacement. Blend shaders renders flashlight on different way on diplacements.
 
 And pls add me somewhere in credits or just say about me in the description.
 
