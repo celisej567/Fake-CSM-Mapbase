@@ -52,5 +52,7 @@ This branch contains some differences from main branch:
 * Instead of copy-paste angles from ligth_env you just should set a name for light_env (csm dont care what exacly name will be). 
 * You should copy color from light_env to CSM color. After this you should change brightness of the light_env (its fourth number in color) to some low value, like 50 or 20.
 
+* The sun is leaking. To fix this try to block light with additional brush and airgap between the wall and new brush.
+
 # If you have some problem or question
 then go to the [Discord server](https://discord.gg/DaBHDTwAU7) and describe the problem.
